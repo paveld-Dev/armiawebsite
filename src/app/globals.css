@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --surface-dark: #101010;
+  --surface-deep: #090909;
+
+  --foreground: #111111;
+  --foreground-muted: #6f6f6f;
+  --foreground-on-dark: #f5f5f5;
+  --foreground-dark-muted: #969696;
+
+  --accent: #ff5a00;
+  --accent-hover: #ff4500;
+
+  --border-light: rgba(0, 0, 0, 0.10);
+  --border-dark: rgba(255, 255, 255, 0.10);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface-dark: var(--surface-dark);
+  --color-surface-deep: var(--surface-deep);
+
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-on-dark: var(--foreground-on-dark);
+  --color-foreground-dark-muted: var(--foreground-dark-muted);
+
+  --color-brand-accent: var(--accent);
+  --color-brand-accent-hover: var(--accent-hover);
+
+  --color-border-light: var(--border-light);
+  --color-border-dark: var(--border-dark);
+
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
+html {
+  background-color: var(--surface-deep);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* proximity: snaps when near a snap point, but lets storytelling sections scroll freely */
+  scroll-snap-type: y proximity;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: #ff5a00;
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #090909;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #262626;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff5a00;
+}
+
+:focus-visible {
+  outline: 2px solid #ff5a00;
+  outline-offset: 3px;
+}
+
+/* ─── Scroll Snap — standard fixed-height sections ─────────────────────────
+   .snap-section  → single-viewport height, hard snap stop
+   .scroll-scene  → multi-viewport storytelling section, NO snap align.
+                    The browser scrolls freely through it and snaps to
+                    the NEXT .snap-section after the scene is exhausted.
+──────────────────────────────────────────────────────────────────────────── */
+.snap-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* Storytelling / scroll-driven sections — no snap alignment */
+.scroll-scene {
+  /* intentionally no scroll-snap-align */
+  /* The outer wrapper provides the scroll distance. */
+  /* The sticky inner always fills 100svh during that distance. */
+}
+
+/* ─── Section transition continuity ─────────────────────────────────────────
+   Dark sections stack above white sections so the incoming background
+   surface visually takes over the previous one on scroll.
+   Order mirrors the page layout: higher index = later in document.
+──────────────────────────────────────────────────────────────────────────── */
+.section-hero         { z-index: 10; position: relative; }
+.section-mission      { z-index: 15; position: relative; }
+.section-services     { z-index: 20; position: relative; }
+.section-process      { z-index: 25; position: relative; }
+.section-portfolio    { z-index: 30; position: relative; }
+.section-testimonials { z-index: 35; position: relative; }
+.section-faq          { z-index: 40; position: relative; }
+.section-blog         { z-index: 45; position: relative; }
+.section-footer       { z-index: 50; position: relative; }
+
+/* Subtle top shadow on sections to give depth edge on transition */
+.section-edge-shadow {
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
+}
+
+/* ─── CTA Button — orange border sweep on hover ──────────────────────────────
+   Usage: add class "cta-sweep" to any CTA button wrapper.
+   The ::before pseudo element sweeps in from left on hover.
+──────────────────────────────────────────────────────────────────────────── */
+.cta-sweep {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.cta-sweep::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid #FF5C00;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cta-sweep:hover::before {
+  transform: scaleX(1);
+}
+
+/* ─── Image depth hover ──────────────────────────────────────────────────────
+   Usage: add class "img-depth" to the overflow container.
+   Child img/video will scale 1 → 1.025 over 700ms.
+   Clip is enforced by overflow-hidden on the wrapper.
+──────────────────────────────────────────────────────────────────────────── */
+.img-depth {
+  overflow: hidden;
+}
+
+.img-depth img,
+.img-depth video {
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.img-depth:hover img,
+.img-depth:hover video {
+  transform: scale(1.025);
+}
+
+/* Already-scaled images inside groups should not double-stack */
+.img-depth .group:hover img {
+  transform: none;
+}
+
+/* ─── Prefers reduced motion — blanket override ──────────────────────────────
+   Disables all CSS transitions/animations for users who request it.
+   Framer Motion reads useReducedMotion() for JS-driven animations.
+──────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .cta-sweep::before {
+    transition: none;
+  }
+
+  .img-depth img,
+  .img-depth video {
+    transition: none;
+  }
+}
+
