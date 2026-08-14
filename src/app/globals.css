@@ -43,8 +43,7 @@ html {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* proximity: snaps when near a snap point, but lets storytelling sections scroll freely */
-  scroll-snap-type: y proximity;
+  scroll-snap-type: y mandatory;
 }
 
 body {
@@ -78,116 +77,8 @@ body {
   outline-offset: 3px;
 }
 
-/* ─── Scroll Snap — standard fixed-height sections ─────────────────────────
-   .snap-section  → single-viewport height, hard snap stop
-   .scroll-scene  → multi-viewport storytelling section, NO snap align.
-                    The browser scrolls freely through it and snaps to
-                    the NEXT .snap-section after the scene is exhausted.
-──────────────────────────────────────────────────────────────────────────── */
+/* Scroll Snap Architecture */
 .snap-section {
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
-
-/* Storytelling / scroll-driven sections — no snap alignment */
-.scroll-scene {
-  /* intentionally no scroll-snap-align */
-  /* The outer wrapper provides the scroll distance. */
-  /* The sticky inner always fills 100svh during that distance. */
-}
-
-/* ─── Section transition continuity ─────────────────────────────────────────
-   Dark sections stack above white sections so the incoming background
-   surface visually takes over the previous one on scroll.
-   Order mirrors the page layout: higher index = later in document.
-──────────────────────────────────────────────────────────────────────────── */
-.section-hero         { z-index: 10; position: relative; }
-.section-mission      { z-index: 15; position: relative; }
-.section-services     { z-index: 20; position: relative; }
-.section-process      { z-index: 25; position: relative; }
-.section-portfolio    { z-index: 30; position: relative; }
-.section-testimonials { z-index: 35; position: relative; }
-.section-faq          { z-index: 40; position: relative; }
-.section-blog         { z-index: 45; position: relative; }
-.section-footer       { z-index: 50; position: relative; }
-
-/* Subtle top shadow on sections to give depth edge on transition */
-.section-edge-shadow {
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
-}
-
-/* ─── CTA Button — orange border sweep on hover ──────────────────────────────
-   Usage: add class "cta-sweep" to any CTA button wrapper.
-   The ::before pseudo element sweeps in from left on hover.
-──────────────────────────────────────────────────────────────────────────── */
-.cta-sweep {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.cta-sweep::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 1.5px solid #FF5C00;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.cta-sweep:hover::before {
-  transform: scaleX(1);
-}
-
-/* ─── Image depth hover ──────────────────────────────────────────────────────
-   Usage: add class "img-depth" to the overflow container.
-   Child img/video will scale 1 → 1.025 over 700ms.
-   Clip is enforced by overflow-hidden on the wrapper.
-──────────────────────────────────────────────────────────────────────────── */
-.img-depth {
-  overflow: hidden;
-}
-
-.img-depth img,
-.img-depth video {
-  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
-}
-
-.img-depth:hover img,
-.img-depth:hover video {
-  transform: scale(1.025);
-}
-
-/* Already-scaled images inside groups should not double-stack */
-.img-depth .group:hover img {
-  transform: none;
-}
-
-/* ─── Prefers reduced motion — blanket override ──────────────────────────────
-   Disables all CSS transitions/animations for users who request it.
-   Framer Motion reads useReducedMotion() for JS-driven animations.
-──────────────────────────────────────────────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-
-  .cta-sweep::before {
-    transition: none;
-  }
-
-  .img-depth img,
-  .img-depth video {
-    transition: none;
-  }
-}
-

@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { GridLines } from "@/components/ui/GridLines";
 import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 import { EASE_CUSTOM, fadeUp, fadeUpSmall, staggerContainer, VIEWPORT_ONCE } from "@/lib/motion";
-// TypewriterText replaced by motion line-by-line reveal
+import { TypewriterText } from "@/components/effects/TypewriterText";
 
 export function FooterSection() {
   const [formData, setFormData] = useState({
@@ -30,7 +30,7 @@ export function FooterSection() {
   };
 
   return (
-    <footer id="contact" className="section-footer relative w-full bg-[#0a0a0a] text-white pt-0 pb-12 overflow-hidden select-none border-t-[3px] border-brand-accent">
+    <footer id="contact" className="relative w-full bg-[#0a0a0a] text-white pt-0 pb-12 overflow-hidden select-none border-t-[3px] border-brand-accent">
       <GridLines />
 
       <div className="relative z-10 mx-auto max-w-[1920px] w-full">
@@ -117,21 +117,10 @@ export function FooterSection() {
                   markup just never surfaced it like every other section does. */}
               <SectionEyebrow number="09" label="CONTACT" dark />
 
-              <div className="font-sans text-[clamp(2.6rem,4.5vw,5.5rem)] font-bold tracking-[-0.04em] leading-[0.94] text-white uppercase max-w-3xl mb-8">
-                {["BUILD YOUR", "NEXT PROJECT", "WITH ARMIA."].map((line, i) => (
-                  <div key={line} className="overflow-hidden">
-                    <motion.span
-                      initial={{ y: "105%", opacity: 0 }}
-                      whileInView={{ y: "0%", opacity: 1 }}
-                      viewport={VIEWPORT_ONCE}
-                      transition={{ duration: 0.8, ease: EASE_CUSTOM, delay: 0.1 + i * 0.12 }}
-                      className="block"
-                    >
-                      {line}
-                    </motion.span>
-                  </div>
-                ))}
-              </div>
+              <TypewriterText
+                text={"BUILD YOUR\nNEXT PROJECT\nWITH ARMIA."}
+                className="font-sans text-[clamp(2.6rem,4.5vw,5.5rem)] font-bold tracking-[-0.04em] leading-[0.94] text-white uppercase max-w-3xl mb-8"
+              />
 
               <motion.div
                 initial={{ opacity: 0, y: "15%" }}
@@ -151,71 +140,61 @@ export function FooterSection() {
                 </div>
               </motion.div>
 
-              {/* Form fields reveal sequentially, one after another */}
-              <form onSubmit={handleSubmit} className="space-y-6 mb-16 max-w-4xl">
-                {[
-                  {
-                    label: "YOUR NAME",
-                    field: (
-                      <input
-                        type="text"
-                        required
-                        placeholder="Jane Smith"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full bg-[#161616] text-white font-mono text-xs px-5 py-4 border border-white/10 rounded-none focus:outline-none focus:border-brand-accent placeholder:text-white/30 transition-colors duration-200"
-                      />
-                    ),
-                  },
-                  {
-                    label: "EMAIL ADDRESS",
-                    field: (
-                      <input
-                        type="email"
-                        required
-                        placeholder="hello@armiasystems.com"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full bg-[#161616] text-white font-mono text-xs px-5 py-4 border border-white/10 rounded-none focus:outline-none focus:border-brand-accent placeholder:text-white/30 transition-colors duration-200"
-                      />
-                    ),
-                  },
-                  {
-                    label: "HOW CAN I HELP?",
-                    field: (
-                      <textarea
-                        rows={4}
-                        required
-                        placeholder="Tell us about your project ..."
-                        value={formData.message}
-                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        className="w-full bg-[#161616] text-white font-mono text-xs px-5 py-4 border border-white/10 rounded-none focus:outline-none focus:border-brand-accent placeholder:text-white/30 resize-none transition-colors duration-200"
-                      />
-                    ),
-                  },
-                ].map(({ label, field }, i) => (
-                  <motion.div
-                    key={label}
-                    initial={{ opacity: 0, y: 14 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={VIEWPORT_ONCE}
-                    transition={{ duration: 0.55, ease: EASE_CUSTOM, delay: 0.55 + i * 0.12 }}
-                  >
-                    <label className="flex items-center gap-1.5 font-mono text-[9px] md:text-[10px] tracking-widest text-white/60 uppercase mb-2">
-                      <span className="h-1 w-1 bg-brand-accent inline-block" />
-                      <span>{label}</span>
-                    </label>
-                    {field}
-                  </motion.div>
-                ))}
+              {/* Form fields reveal one after another instead of all at once */}
+              <motion.form
+                onSubmit={handleSubmit}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ duration: 0.8, ease: EASE_CUSTOM, delay: 1.0 }}
+                viewport={VIEWPORT_ONCE}
+                className="space-y-6 mb-16 max-w-4xl"
+              >
+                <div>
+                  <label className="flex items-center gap-1.5 font-mono text-[9px] md:text-[10px] tracking-widest text-white/60 uppercase mb-2">
+                    <span className="h-1 w-1 bg-brand-accent inline-block" />
+                    <span>YOUR NAME</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Jane Smith"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full bg-[#161616] text-white font-mono text-xs px-5 py-4 border border-white/10 rounded-none focus:outline-none focus:border-brand-accent placeholder:text-white/30 transition-colors duration-200"
+                  />
+                </div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={VIEWPORT_ONCE}
-                  transition={{ duration: 0.5, ease: EASE_CUSTOM, delay: 0.95 }}
-                  className="pt-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
-                >
+                <div>
+                  <label className="flex items-center gap-1.5 font-mono text-[9px] md:text-[10px] tracking-widest text-white/60 uppercase mb-2">
+                    <span className="h-1 w-1 bg-brand-accent inline-block" />
+                    <span>EMAIL ADDRESS</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="hello@armiasystems.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full bg-[#161616] text-white font-mono text-xs px-5 py-4 border border-white/10 rounded-none focus:outline-none focus:border-brand-accent placeholder:text-white/30 transition-colors duration-200"
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-1.5 font-mono text-[9px] md:text-[10px] tracking-widest text-white/60 uppercase mb-2">
+                    <span className="h-1 w-1 bg-brand-accent inline-block" />
+                    <span>HOW CAN I HELP?</span>
+                  </label>
+                  <textarea
+                    rows={4}
+                    required
+                    placeholder="Tell us about your project ..."
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="w-full bg-[#161616] text-white font-mono text-xs px-5 py-4 border border-white/10 rounded-none focus:outline-none focus:border-brand-accent placeholder:text-white/30 resize-none transition-colors duration-200"
+                  />
+                </div>
+
+                <div className="pt-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                   <motion.button
                     type="submit"
                     whileHover={{ x: 4 }}
@@ -235,31 +214,20 @@ export function FooterSection() {
                     <Link href="#terms" className="text-white/70 underline hover:text-white">Terms</Link> and{" "}
                     <Link href="#privacy" className="text-white/70 underline hover:text-white">Privacy Policy</Link>.
                   </div>
-                </motion.div>
-              </form>
+                </div>
+              </motion.form>
             </div>
 
             <div className="pt-12 border-t border-white/10">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mb-12 font-mono text-[10px] tracking-wider uppercase">
-                <motion.div
-                  variants={staggerContainer(0.06, 0.2)}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={VIEWPORT_ONCE}
-                  className="md:col-span-5 space-y-2.5"
-                >
-                  {["PRODUCTS", "SERVICES", "SOLUTIONS", "CAREERS", "CONTACT"].map((link) => (
-                    <motion.div
-                      key={link}
-                      variants={fadeUpSmall}
-                    >
-                      <Link href={`#${link.toLowerCase()}`} className="text-white/70 hover:text-brand-accent transition-colors">{link}</Link>
-                    </motion.div>
-                  ))}
-                  <motion.div variants={fadeUpSmall}>
-                    <Link href="#404" className="text-white/40 hover:text-brand-accent transition-colors">404</Link>
-                  </motion.div>
-                </motion.div>
+                <div className="md:col-span-5 space-y-2.5">
+                  <div><Link href="#products" className="text-white/70 hover:text-brand-accent transition-colors">PRODUCTS</Link></div>
+                  <div><Link href="#services" className="text-white/70 hover:text-brand-accent transition-colors">SERVICES</Link></div>
+                  <div><Link href="#solutions" className="text-white/70 hover:text-brand-accent transition-colors">SOLUTIONS</Link></div>
+                  <div><Link href="#careers" className="text-white/70 hover:text-brand-accent transition-colors">CAREERS</Link></div>
+                  <div><Link href="#contact" className="text-white/70 hover:text-brand-accent transition-colors">CONTACT</Link></div>
+                  <div><Link href="#404" className="text-white/40 hover:text-brand-accent transition-colors">404</Link></div>
+                </div>
 
                 <div className="md:col-span-7 space-y-4">
                   <div className="text-white/50 leading-relaxed font-sans normal-case text-xs">
