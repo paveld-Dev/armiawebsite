@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { EASE_CUSTOM } from "@/lib/motion";
 import { GridLines } from "@/components/ui/GridLines";
+import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 
 const services = [
   {
@@ -73,19 +74,9 @@ export function ServicesSection() {
         {/* Upper Header Row matching Grid Columns */}
         <div className="relative w-full flex flex-col md:flex-row items-start mb-8 md:mb-10">
           {/* Far Left Section Marker: 10.8% to 30.3% */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, ease: EASE_CUSTOM }}
-            className="w-full md:w-[19.5%] md:ml-[10.8%] px-6 md:px-0 pt-1 mb-6 md:mb-0"
-          >
-            <div className="flex items-center gap-2 font-mono text-[7.5px] md:text-[8px] tracking-[0.04em] uppercase text-[#b0b0ad]">
-              <span className="h-[4px] w-[4px] bg-[#FF5C00] inline-block" />
-              <span>03</span>
-              <span>SERVICES</span>
-            </div>
-          </motion.div>
+          <div className="w-full md:w-[19.5%] md:ml-[10.8%] px-6 md:px-0 pt-1 mb-6 md:mb-0">
+            <SectionEyebrow number="03" label="SERVICES" dark className="!mb-0" />
+          </div>
 
           {/* Heading Block: 30.3% to 69.3% */}
           <div className="w-full md:w-[39.0%] px-6 md:px-0 pt-0.5 mb-6 md:mb-0">
