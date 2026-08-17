@@ -1,33 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { EASE_CUSTOM } from "@/lib/motion";
 
-/**
- * High-precision liquid physics loader:
- * - SVG <mask> with <text> clips the entire fluid simulation STRICTLY inside the ARMIA glyphs.
- * - Dual physics-based undulating sine wave layers (crests, troughs, sloshing phase offsets).
- * - Floating, buoyancy-driven water bubbles that wobble and pop as they ascend within the text.
- * - Glowing liquid meniscus surface with water highlights.
- */
-const MIN_DURATION_MS = 2500;
+const TOTAL_DURATION_MS = 2500;
+const EASING_CINEMATIC = [0.22, 1, 0.36, 1] as const;
 
-// Individual bubble physics inside the liquid
-const BUBBLES = [
-  { id: 1, cx: 220, r: 8, delay: 0.1, duration: 1.6, xDrift: 15 },
-  { id: 2, cx: 340, r: 12, delay: 0.5, duration: 2.0, xDrift: -20 },
-  { id: 3, cx: 480, r: 6, delay: 0.2, duration: 1.4, xDrift: 10 },
-  { id: 4, cx: 600, r: 14, delay: 0.7, duration: 2.2, xDrift: -16 },
-  { id: 5, cx: 720, r: 9, delay: 0.3, duration: 1.8, xDrift: 22 },
-  { id: 6, cx: 860, r: 13, delay: 0.6, duration: 2.1, xDrift: -12 },
-  { id: 7, cx: 980, r: 7, delay: 0.2, duration: 1.5, xDrift: 18 },
-  { id: 8, cx: 1100, r: 11, delay: 0.8, duration: 1.9, xDrift: -14 },
+const CODE_LINES = [
+  { line: 1, prefix: "01", code: 'import { createEnterpriseCore } from "@armia/systems";', highlight: "keyword" },
+  { line: 2, prefix: "02", code: 'import { scalableArchitecture, aiModules } from "@/kernel";', highlight: "import" },
+  { line: 3, prefix: "03", code: "", highlight: "empty" },
+  { line: 4, prefix: "04", code: "const runtime = await createEnterpriseCore({", highlight: "fn" },
+  { line: 5, prefix: "05", code: '  studio: "ARMIA SYSTEMS",', highlight: "str" },
+  { line: 6, prefix: "06", code: "  est: 2004,", highlight: "num" },
+  { line: 7, prefix: "07", code: "  security: true, highConcurrency: true,", highlight: "bool" },
+  { line: 8, prefix: "08", code: '  cluster: "NODE_US_EAST_01",', highlight: "str" },
+  { line: 9, prefix: "09", code: "});", highlight: "fn" },
+  { line: 10, prefix: "10", code: "", highlight: "empty" },
+  { line: 11, prefix: "11", code: "await runtime.hydrateViewport(); // [ARMIA KERNEL MOUNTED]", highlight: "comment" },
 ];
 
 export function PageLoader() {
   const [visible, setVisible] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [activeLineCount, setActiveLineCount] = useState(1);
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -42,13 +38,18 @@ export function PageLoader() {
 
     function tick(now: number) {
       const elapsed = now - start;
-      const t = Math.min(1, elapsed / MIN_DURATION_MS);
-      // Realistic liquid filling curve (accelerates as pump fills, eases at brim)
-      const easedT = t < 0.65 ? (t / 0.65) * 0.7 : 0.7 + ((t - 0.65) / 0.35) * 0.3;
-      const pct = Math.min(100, Math.round(easedT * 100));
-      setProgress(pct);
+      const progressFraction = Math.min(1, elapsed / TOTAL_DURATION_MS);
+      const currentPct = Math.min(100, Math.floor(progressFraction * 100));
+      setProgress(currentPct);
 
-      if (elapsed < MIN_DURATION_MS) {
+      // Typing code line-by-line according to progress
+      const linesVisible = Math.max(
+        1,
+        Math.min(CODE_LINES.length, Math.floor(progressFraction * CODE_LINES.length) + 1)
+      );
+      setActiveLineCount(linesVisible);
+
+      if (elapsed < TOTAL_DURATION_MS) {
         raf = requestAnimationFrame(tick);
       } else {
         setProgress(100);
@@ -57,6 +58,7 @@ export function PageLoader() {
         }, 360);
       }
     }
+
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, []);
@@ -65,219 +67,163 @@ export function PageLoader() {
     if (!visible) document.body.style.overflow = "";
   }, [visible]);
 
-  // Map progress (0 -> 100) to SVG view box Y coordinate (viewBox height is 300)
-  // Text sits vertically between Y = 60 and Y = 250
-  const waterLevelY = 270 - (progress / 100) * 230;
-
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
-          key="page-loader"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.7, ease: EASE_CUSTOM } }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#101010] text-[#f3f3f0] select-none overflow-hidden"
+          key="coding-screen-loader"
+          initial={{ clipPath: "inset(0% 0% 0% 0%)" }}
+          exit={{
+            clipPath: "inset(0% 0% 100% 0%)",
+            transition: { duration: 0.85, ease: EASING_CINEMATIC },
+          }}
+          className="fixed inset-0 z-[9999] flex flex-col justify-between bg-[#0a0a0c] text-[#f3f3f0] select-none overflow-hidden p-6 md:p-12 font-mono"
         >
-          {/* Background Texture identical to Services Section */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('/noise.png')]" />
+          {/* Subtle Cybernetic Grid Pattern */}
+          <div 
+            className="absolute inset-0 opacity-[0.035] pointer-events-none"
+            style={{
+              backgroundImage: "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
+              backgroundSize: "48px 48px"
+            }}
+          />
 
-          {/* Top Eyebrow Tag */}
-          <div className="absolute top-8 md:top-12 z-20 flex items-center justify-between w-full max-w-[1920px] px-6 md:px-12 font-mono text-[9px] md:text-[10px] tracking-[0.25em] text-white/50 uppercase">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 bg-brand-accent animate-pulse" />
-              <span>INITIALIZING ARCHITECTURE</span>
-            </div>
-            <span>©2004–2026</span>
-          </div>
-
-          {/* Center Liquid Physical SVG Simulation */}
-          <div className="relative z-20 w-full max-w-[1240px] px-4 flex flex-col items-center justify-center">
-            
-            <div className="w-full relative flex items-center justify-center">
-              <svg
-                viewBox="0 0 1300 300"
-                className="w-full h-auto max-h-[38vh] overflow-visible drop-shadow-[0_0_50px_rgba(255,92,0,0.35)]"
-              >
-                <defs>
-                  {/* Linear Liquid Color Gradient */}
-                  <linearGradient id="waterGradDeep" x1="0%" y1="100%" x2="0%" y2="0%">
-                    <stop offset="0%" stopColor="#d93800" />
-                    <stop offset="45%" stopColor="#ff5a00" />
-                    <stop offset="85%" stopColor="#ff7a00" />
-                    <stop offset="100%" stopColor="#ffa043" />
-                  </linearGradient>
-
-                  <linearGradient id="waterGradBack" x1="0%" y1="100%" x2="0%" y2="0%">
-                    <stop offset="0%" stopColor="#b32e00" stopOpacity="0.7" />
-                    <stop offset="60%" stopColor="#e64a00" stopOpacity="0.8" />
-                    <stop offset="100%" stopColor="#ff851b" stopOpacity="0.9" />
-                  </linearGradient>
-
-                  {/* Surface Glow Gradient */}
-                  <linearGradient id="foamGlow" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#ffaa00" stopOpacity="0.2" />
-                    <stop offset="50%" stopColor="#ffffff" stopOpacity="0.95" />
-                    <stop offset="100%" stopColor="#ffaa00" stopOpacity="0.2" />
-                  </linearGradient>
-
-                  {/* 1. MASK: Strictly cuts anything outside of ARMIA letterforms */}
-                  <mask id="armiaTextMask">
-                    {/* Black background = transparent */}
-                    <rect width="100%" height="100%" fill="black" />
-                    {/* White text = opaque reveal portal */}
-                    <text
-                      x="50%"
-                      y="74%"
-                      textAnchor="middle"
-                      fill="white"
-                      fontFamily="var(--font-geist-sans), var(--font-sans), system-ui, sans-serif"
-                      fontWeight="400"
-                      fontSize="220"
-                      letterSpacing="-0.04em"
-                    >
-                      ARMIA
-                    </text>
-                  </mask>
-                </defs>
-
-                {/* 2. BASE: Subdued Outlined & Translucent Body Text (Unfilled portion) */}
-                <text
-                  x="50%"
-                  y="74%"
-                  textAnchor="middle"
-                  fill="rgba(255, 255, 255, 0.03)"
-                  stroke="rgba(255, 255, 255, 0.18)"
-                  strokeWidth="2"
-                  fontFamily="var(--font-geist-sans), var(--font-sans), system-ui, sans-serif"
-                  fontWeight="400"
-                  fontSize="220"
-                  letterSpacing="-0.04em"
-                  className="select-none"
-                >
-                  ARMIA
-                </text>
-
-                {/* 3. FLUID SIMULATION: Rendered entirely inside the mask */}
-                <g mask="url(#armiaTextMask)">
-                  
-                  {/* Wave Layer 1 (Back wave, slower offset phase) */}
-                  <motion.g
-                    animate={{
-                      x: [0, -650],
-                    }}
-                    transition={{
-                      duration: 3.8,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                  >
-                    <path
-                      fill="url(#waterGradBack)"
-                      d={`
-                        M 0,${waterLevelY + 4}
-                        Q 162.5,${waterLevelY - 10} 325,${waterLevelY + 4}
-                        T 650,${waterLevelY + 4}
-                        T 975,${waterLevelY + 4}
-                        T 1300,${waterLevelY + 4}
-                        T 1625,${waterLevelY + 4}
-                        T 1950,${waterLevelY + 4}
-                        L 1950,350
-                        L 0,350
-                        Z
-                      `}
-                    />
-                  </motion.g>
-
-                  {/* Wave Layer 2 (Front wave with liquid slosh amplitude) */}
-                  <motion.g
-                    animate={{
-                      x: [0, -650],
-                    }}
-                    transition={{
-                      duration: 2.6,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                  >
-                    <path
-                      fill="url(#waterGradDeep)"
-                      d={`
-                        M 0,${waterLevelY}
-                        Q 162.5,${waterLevelY + 12} 325,${waterLevelY}
-                        T 650,${waterLevelY}
-                        T 975,${waterLevelY}
-                        T 1300,${waterLevelY}
-                        T 1625,${waterLevelY}
-                        T 1950,${waterLevelY}
-                        L 1950,350
-                        L 0,350
-                        Z
-                      `}
-                    />
-
-                    {/* Glowing Water Meniscus Highlight along the crest */}
-                    <path
-                      fill="none"
-                      stroke="url(#foamGlow)"
-                      strokeWidth="3.5"
-                      d={`
-                        M 0,${waterLevelY}
-                        Q 162.5,${waterLevelY + 12} 325,${waterLevelY}
-                        T 650,${waterLevelY}
-                        T 975,${waterLevelY}
-                        T 1300,${waterLevelY}
-                        T 1625,${waterLevelY}
-                        T 1950,${waterLevelY}
-                      `}
-                    />
-                  </motion.g>
-
-                  {/* 4. Rising Physical Bubbles Inside Liquid */}
-                  {progress > 8 &&
-                    BUBBLES.map((b) => (
-                      <motion.circle
-                        key={b.id}
-                        cx={b.cx}
-                        r={b.r}
-                        fill="rgba(255, 255, 255, 0.75)"
-                        stroke="#ffe6b0"
-                        strokeWidth="1.5"
-                        initial={{
-                          cy: 280,
-                          opacity: 0,
-                          scale: 0.5,
-                        }}
-                        animate={{
-                          cy: [280, Math.max(waterLevelY, 40)],
-                          x: [0, b.xDrift, 0],
-                          opacity: [0, 0.85, 0.9, 0],
-                          scale: [0.5, 1.1, 0.4],
-                        }}
-                        transition={{
-                          duration: b.duration,
-                          repeat: Infinity,
-                          ease: "easeOut",
-                          delay: b.delay,
-                        }}
-                      />
-                    ))}
-                </g>
-              </svg>
-            </div>
-
-            {/* Real-time Percentage Indicator */}
-            <div className="mt-4 flex items-center justify-center gap-3 font-mono text-[11px] md:text-xs tracking-[0.25em] text-white/70">
-              <span className="uppercase text-white/40">LOADING SYSTEM</span>
-              <span className="font-semibold text-brand-accent tabular-nums">
-                {String(progress).padStart(3, " ")}%
+          {/* Top IDE Header / Terminal Tab Bar */}
+          <div className="relative z-10 w-full max-w-[1920px] mx-auto flex items-center justify-between border-b border-white/[0.08] pb-4">
+            <div className="flex items-center gap-3">
+              {/* Traffic light terminal dots */}
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
+              </div>
+              <div className="h-3 w-[1px] bg-white/20 mx-1" />
+              <span className="text-[10px] md:text-[11px] text-white/80 font-medium tracking-wide">
+                armia_kernel.ts &bull; compilation
               </span>
             </div>
 
+            <div className="flex items-center gap-6 text-[9.5px] md:text-[10.5px] tracking-widest text-white/40 uppercase">
+              <span className="hidden sm:inline text-white/30">V8_TURBOPACK 16.3</span>
+              <span className="text-[#ff5a00] font-bold">READY: {progress}%</span>
+            </div>
           </div>
 
-          {/* Bottom Brand Tagline */}
-          <div className="absolute bottom-8 md:bottom-12 z-20 flex items-center justify-center font-mono text-[8.5px] md:text-[9.5px] tracking-[0.22em] text-white/40 uppercase">
-            ENTERPRISE SOFTWARE &bull; SINCE 2004
+          {/* Center Coding Terminal Box & ARMIA Assembly */}
+          <div className="relative z-10 w-full max-w-4xl mx-auto my-auto flex flex-col justify-center">
+            {/* Terminal Window Frame */}
+            <div className="relative rounded-none border border-white/[0.1] bg-[#111114]/90 backdrop-blur-xl p-6 md:p-10 shadow-[0_20px_70px_rgba(0,0,0,0.8)]">
+              {/* ARMIA Watermark in Background */}
+              <div className="absolute right-6 bottom-4 pointer-events-none opacity-[0.03] select-none text-[clamp(4rem,10vw,8rem)] font-bold tracking-tight text-white">
+                ARMIA
+              </div>
+
+              {/* Code Streams */}
+              <div className="space-y-1.5 md:space-y-2 text-[12px] md:text-[14px] leading-relaxed font-mono">
+                {CODE_LINES.slice(0, activeLineCount).map((item) => (
+                  <div key={item.line} className="flex items-start gap-4 md:gap-6">
+                    <span className="text-white/25 select-none w-6 shrink-0 text-right text-[11px]">
+                      {item.prefix}
+                    </span>
+                    <span className="flex-1 whitespace-pre-wrap">
+                      {item.highlight === "keyword" && (
+                        <>
+                          <span className="text-[#ff7b72]">import</span>
+                          <span className="text-white">{" { "}</span>
+                          <span className="text-[#79c0ff]">createEnterpriseCore</span>
+                          <span className="text-white">{" } "}</span>
+                          <span className="text-[#ff7b72]">from</span>
+                          <span className="text-[#a5d6ff]"> &quot;@armia/systems&quot;;</span>
+                        </>
+                      )}
+                      {item.highlight === "import" && (
+                        <>
+                          <span className="text-[#ff7b72]">import</span>
+                          <span className="text-white">{" { "}</span>
+                          <span className="text-[#d2a8ff]">scalableArchitecture</span>
+                          <span className="text-white">, </span>
+                          <span className="text-[#d2a8ff]">aiModules</span>
+                          <span className="text-white">{" } "}</span>
+                          <span className="text-[#ff7b72]">from</span>
+                          <span className="text-[#a5d6ff]"> &quot;@/kernel&quot;;</span>
+                        </>
+                      )}
+                      {item.highlight === "fn" && (
+                        <>
+                          <span className="text-[#ff7b72]">const </span>
+                          <span className="text-[#79c0ff]">runtime </span>
+                          <span className="text-[#ff7b72]">= await </span>
+                          <span className="text-[#d2a8ff]">createEnterpriseCore</span>
+                          <span className="text-white">({"{"}</span>
+                          {item.code.includes("});") && <span className="text-white">{"});"}</span>}
+                        </>
+                      )}
+                      {item.highlight === "str" && (
+                        <>
+                          <span className="text-[#7ee787] pl-4">{item.code}</span>
+                        </>
+                      )}
+                      {item.highlight === "num" && (
+                        <>
+                          <span className="text-[#79c0ff] pl-4">{item.code}</span>
+                        </>
+                      )}
+                      {item.highlight === "bool" && (
+                        <>
+                          <span className="text-[#ff7b72] pl-4">{item.code}</span>
+                        </>
+                      )}
+                      {item.highlight === "comment" && (
+                        <span className="text-[#ff5a00] font-semibold">
+                          {item.code}
+                        </span>
+                      )}
+                      {item.highlight === "empty" && <span className="inline-block h-3" />}
+                    </span>
+                  </div>
+                ))}
+
+                {/* Blinking Cursor */}
+                <div className="flex items-center gap-4 md:gap-6 pl-10">
+                  <motion.span
+                    animate={{ opacity: [1, 0, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+                    className="inline-block w-2.5 h-4 bg-[#ff5a00]"
+                  />
+                </div>
+              </div>
+
+              {/* Live Status Bar inside Terminal */}
+              <div className="mt-8 pt-4 border-t border-white/[0.08] flex items-center justify-between text-[10px] md:text-[11px] text-white/50">
+                <div className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#ff5a00] animate-pulse" />
+                  <span className="text-white/80">COMPILING ENTERPRISE MODULES</span>
+                </div>
+                <span className="text-[#ff5a00] font-bold tabular-nums">
+                  [{String(progress).padStart(3, "0")}%]
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Bar: Progress % & Thin Orange Progress Line */}
+          <div className="relative z-10 w-full max-w-[1920px] mx-auto flex flex-col gap-3">
+            <div className="flex items-center justify-between text-[9px] md:text-[10px] tracking-[0.24em] text-white/40 uppercase">
+              <span>INITIALIZING DIGITAL ARCHITECTURE</span>
+              <span className="text-[#ff5a00] font-semibold tabular-nums">{progress}% COMPLETE</span>
+            </div>
+
+            {/* Orange Progress Bar Line (scaleX) */}
+            <div className="relative w-full h-[2px] bg-white/[0.08] overflow-hidden">
+              <motion.div
+                className="absolute inset-y-0 left-0 bg-[#ff5a00] shadow-[0_0_10px_#ff5a00]"
+                style={{
+                  width: "100%",
+                  transformOrigin: "left",
+                  scaleX: progress / 100,
+                }}
+              />
+            </div>
           </div>
         </motion.div>
       )}
