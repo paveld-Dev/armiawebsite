@@ -65,7 +65,7 @@ export function ServicesSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="relative z-20 w-full bg-[#101010] text-[#f3f3f0] h-[100svh] min-h-[100svh] py-10 md:py-14 flex flex-col justify-center overflow-hidden snap-section">
+    <section className="relative z-20 w-full bg-[#101010] text-[#f3f3f0] h-[1080px] min-h-[1080px] py-10 md:py-14 flex flex-col justify-center overflow-hidden snap-section">
       {/* Background / Texture / GridLines */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('/noise.png')]" />
       <GridLines />

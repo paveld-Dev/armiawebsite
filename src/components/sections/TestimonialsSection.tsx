@@ -63,7 +63,7 @@ const testimonialReveal = (index: number) => ({
 
 export function TestimonialsSection() {
   return (
-    <section className="relative z-20 w-full bg-[#101010] text-[#f3f3f0] py-8 md:py-12 border-t border-white/[0.06] overflow-hidden select-none snap-section h-[100svh] min-h-[100svh] flex flex-col justify-center">
+    <section className="relative z-20 w-full bg-[#101010] text-[#f3f3f0] py-8 md:py-12 border-t border-white/[0.06] overflow-hidden select-none snap-section h-[1080px] min-h-[1080px] flex flex-col justify-center">
       {/* Background / Texture / GridLines matching Services Section */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('/noise.png')]" />
       <GridLines />

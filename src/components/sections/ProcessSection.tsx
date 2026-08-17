@@ -64,7 +64,7 @@ export function ProcessSection() {
   } = useRotator(phases, { autoAdvance: true, intervalMs: 4500 });
 
   return (
-    <section className="relative w-full bg-[#101010] text-[#f3f3f0] h-[100svh] min-h-[100svh] py-10 md:py-14 flex flex-col justify-center overflow-hidden select-none snap-section">
+    <section className="relative w-full bg-[#101010] text-[#f3f3f0] h-[1080px] min-h-[1080px] py-10 md:py-14 flex flex-col justify-center overflow-hidden select-none snap-section">
       {/* Architectural Vertical Grid Lines */}
       <GridLines animate={true} animationMode="center" />
 

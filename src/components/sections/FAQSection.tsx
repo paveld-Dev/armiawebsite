@@ -16,7 +16,7 @@ export function FAQSection() {
   };
 
   return (
-    <section className="relative w-full bg-white text-[#111111] py-8 md:py-12 border-t border-black/[0.06] overflow-hidden select-none snap-section h-[100svh] min-h-[100svh] flex flex-col justify-center">
+    <section className="relative w-full bg-white text-[#111111] py-8 md:py-12 border-t border-black/[0.06] overflow-hidden select-none snap-section h-[1080px] min-h-[1080px] flex flex-col justify-center">
       <GridLines light />
 
       <div className="relative z-10 mx-auto max-w-[1920px] w-full px-6 md:px-12 lg:px-16">

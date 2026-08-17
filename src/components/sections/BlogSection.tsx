@@ -12,7 +12,7 @@ export function BlogSection() {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   return (
-    <section className="relative w-full bg-white text-[#111111] h-[100svh] min-h-[100svh] max-h-[1080px] border-t border-black/[0.08] select-none snap-section flex flex-col justify-between overflow-hidden py-6 md:py-8">
+    <section className="relative w-full bg-white text-[#111111] h-[1080px] min-h-[1080px] border-t border-black/[0.08] select-none snap-section flex flex-col justify-between overflow-hidden py-6 md:py-8">
       
       {/* ── Top Header Area ── */}
       <div className="relative z-10 mx-auto max-w-[1920px] w-full px-6 md:px-12 lg:px-16 shrink-0 pb-3 md:pb-4">
