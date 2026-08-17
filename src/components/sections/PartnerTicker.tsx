@@ -4,14 +4,15 @@ import React from "react";
 import { motion } from "framer-motion";
 
 const PARTNERS = [
-  "ANTHROPIC",
-  "OPENAI",
-  "GOOGLE",
-  "AWS",
-  "AZURE",
-  "FIGMA",
-  "VERCEL",
-  "NVIDIA",
+  "ACTIVE NETWORK",
+  "VERA BRADLEY",
+  "ALICE",
+  "AVANT",
+  "FERRARA CANDY COMPANY",
+  "8TO18",
+  "AROUNDCAMPUS GROUP",
+  "JUMPFORWARD",
+  "COLLEGIATEPARENT"
 ];
 
 export function PartnerTicker() {
@@ -26,7 +27,7 @@ export function PartnerTicker() {
           transition={{
             repeat: Infinity,
             ease: "linear",
-            duration: 25,
+            duration: 45,
           }}
           className="flex shrink-0 items-center divide-x divide-black/[0.08]"
         >

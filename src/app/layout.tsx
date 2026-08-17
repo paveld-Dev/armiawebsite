@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CursorFollower } from "@/components/effects/CursorFollower";
 import { PageLoader } from "@/components/ui/PageLoader";
+import { ScrollToTopOnReload } from "@/components/utils/ScrollToTopOnReload";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,8 +40,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full bg-surface-deep font-sans text-foreground selection:bg-brand-accent selection:text-white">
+      <body
+        suppressHydrationWarning
+        className="min-h-full bg-surface-deep font-sans text-foreground selection:bg-brand-accent selection:text-white"
+      >
+        <ScrollToTopOnReload />
         <PageLoader />
         <CursorFollower />
         {children}
