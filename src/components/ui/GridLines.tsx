@@ -18,11 +18,11 @@ const POSITIONS = [
   { left: "88.8%", hideOnMobile: false },
 ];
 
-export function GridLines({ 
-  light = false, 
+export function GridLines({
+  light = false,
   animate = false,
   animationMode = "none",
-  className = "" 
+  className = ""
 }: GridLinesProps) {
   const color = light ? "bg-black/[0.05]" : "bg-white/[0.035]";
 
@@ -44,9 +44,8 @@ export function GridLines({
               viewport={shouldAnimate ? { once: true } : undefined}
               transition={shouldAnimate ? { duration: 0.8, delay: i * 0.05, ease: EASE_CUSTOM } : undefined}
               style={{ left: pos.left, transformOrigin: "top" }}
-              className={`absolute top-0 bottom-0 w-px ${color} ${
-                pos.hideOnMobile ? "hidden md:block" : ""
-              }`}
+              className={`absolute top-0 bottom-0 w-px ${color} ${pos.hideOnMobile ? "hidden md:block" : ""
+                }`}
             />
           );
         })}

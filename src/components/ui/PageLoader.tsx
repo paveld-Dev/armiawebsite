@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { EASE_CUSTOM } from "@/lib/motion";
-import { GridLines } from "@/components/ui/GridLines";
 
 /**
  * High-precision liquid physics loader:
@@ -81,7 +80,6 @@ export function PageLoader() {
         >
           {/* Background Texture identical to Services Section */}
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('/noise.png')]" />
-          <GridLines />
 
           {/* Top Eyebrow Tag */}
           <div className="absolute top-8 md:top-12 z-20 flex items-center justify-between w-full max-w-[1920px] px-6 md:px-12 font-mono text-[9px] md:text-[10px] tracking-[0.25em] text-white/50 uppercase">

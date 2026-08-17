@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { BLOG_ARTICLES } from "@/data/blog";
+import { GridLines } from "@/components/ui/GridLines";
 import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 import { fadeUp, VIEWPORT_ONCE, EASE_CUSTOM } from "@/lib/motion";
 
@@ -12,53 +13,45 @@ export function BlogSection() {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   return (
-    <section className="relative w-full bg-white text-[#111111] h-[1080px] min-h-[1080px] border-t border-black/[0.08] select-none snap-section flex flex-col justify-between overflow-hidden py-6 md:py-8">
+    <section className="relative w-full bg-white text-[#111111] h-[1080px] min-h-[1080px] border-t border-black/[0.08] select-none snap-section flex flex-col justify-between overflow-hidden py-10 md:py-14">
+      <GridLines light />
       
-      {/* ── Top Header Area ── */}
-      <div className="relative z-10 mx-auto max-w-[1920px] w-full px-6 md:px-12 lg:px-16 shrink-0 pb-3 md:pb-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
-          {/* 08 / BLOG Eyebrow */}
-          <div className="lg:col-span-3">
-            <SectionEyebrow number="08" label="BLOG" className="!mb-0" />
+      {/* ── Top Header Area (Matching 10.8% / 30.3% / 69.3% Grid) ── */}
+      <div className="relative z-10 w-full max-w-[1920px] mx-auto px-6 md:px-0 shrink-0 mb-6 md:mb-8">
+        <div className="relative w-full flex flex-col md:flex-row items-start">
+          {/* Far Left Section Marker: 10.8% to 30.3% */}
+          <div className="w-full md:w-[19.5%] md:ml-[10.8%] px-6 md:px-0 pt-1 mb-6 md:mb-0">
+            <SectionEyebrow number="09" label="BLOG" className="!mb-0" />
           </div>
 
-          {/* INSIGHTS & ENGINEERING BLOG Headline */}
-          <div className="lg:col-span-5">
+          {/* Heading Block: 30.3% to 69.3% */}
+          <div className="w-full md:w-[39.0%] px-6 md:px-0 pt-0.5 mb-6 md:mb-0">
             <motion.h2
               variants={fadeUp}
               initial="hidden"
               whileInView="show"
               viewport={VIEWPORT_ONCE}
-              className="font-sans text-[clamp(2.2rem,3.2vw,3.8rem)] font-[450] tracking-[-0.045em] leading-[0.96] uppercase text-[#111111]"
+              className="font-sans text-[clamp(2.3rem,3.2vw,4.1rem)] font-normal tracking-[-0.04em] leading-[0.94] text-left uppercase text-[#111111]"
             >
-              <span className="block text-[#777777]">INSIGHTS</span>
-              <span className="block text-[#111111]">&amp; ENGINEERING</span>
-              <span className="block text-[#111111]">BLOG</span>
+              <span className="block text-[#777777]">INSIGHTS &</span>
+              <span className="block text-[#111111] font-medium">ENGINEERING BLOG.</span>
             </motion.h2>
-          </div>
 
-          {/* Subtext description */}
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={VIEWPORT_ONCE}
-            className="lg:col-span-2 flex justify-start lg:justify-end pt-1"
-          >
-            <p className="font-mono text-[10px] md:text-[11px] leading-[1.3] tracking-wider uppercase text-[#666666] max-w-[220px]">
+            <p className="font-mono text-[10px] md:text-[11px] leading-relaxed text-[#666666] mt-4 md:mt-5 uppercase tracking-wide max-w-[280px]">
               WE SHARE IDEAS, LESSONS, AND PRACTICAL INSIGHTS FROM OUR WORK.
             </p>
-          </motion.div>
+          </div>
 
-          {/* ALL ARTICLES link */}
-          <div className="lg:col-span-2 flex justify-start lg:justify-end items-start pt-1">
-            <Link
-              href="#all-articles"
-              className="group inline-flex items-center gap-1.5 font-mono text-[9px] md:text-[10px] font-medium tracking-widest uppercase text-[#111111] hover:text-brand-accent transition-colors"
-            >
-              <span>ALL ARTICLES</span>
-              <span className="transition-transform duration-200 group-hover:translate-x-1">›</span>
-            </Link>
+          {/* Right Supporting Link: 69.3% to 88.8% */}
+          <div className="w-full md:w-[19.5%] px-6 md:px-0 pt-1 flex justify-start">
+            <div className="flex flex-col gap-4">
+              <Link
+                href="#all-articles"
+                className="font-mono text-[10px] md:text-[11px] text-[#ff5a00] tracking-widest uppercase hover:text-[#111111] transition-colors"
+              >
+                ALL ARTICLES →
+              </Link>
+            </div>
           </div>
         </div>
       </div>

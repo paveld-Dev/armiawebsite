@@ -44,68 +44,70 @@ export function FooterSection() {
             viewport={VIEWPORT_ONCE}
             className="lg:col-span-4 p-6 md:p-10 lg:p-12 flex flex-col justify-between h-full bg-[#0a0a0a]"
           >
-            <div>
-              <div className="relative w-full mb-10 overflow-hidden bg-neutral-900 border-t-[3px] border-brand-accent shadow-2xl group">
-                <div className="relative w-full aspect-[4/5] bg-neutral-800 overflow-hidden">
+            <div className="flex flex-col justify-between flex-1">
+              <div>
+                <div className="relative w-full mb-10 overflow-hidden bg-neutral-900 border-t-[3px] border-brand-accent shadow-2xl group">
+                  <div className="relative w-full aspect-[4/5] bg-neutral-800 overflow-hidden">
+                    <Image
+                      src="/images/engineering_team.png"
+                      alt="Armia Leadership & Engineering"
+                      fill
+                      className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                    />
+                  </div>
+                  <a
+                    href="mailto:hello@armiasystems.com"
+                    className="flex items-center justify-between bg-[#111111] text-white h-[46px] px-5 font-mono text-[10px] md:text-[11px] tracking-[0.16em] uppercase transition-colors duration-300 hover:bg-black group-hover:bg-[#151515]"
+                  >
+                    <span className="font-medium text-white/90">
+                      GET IN TOUCH <span className="text-white/40 font-light">\ ARMIA</span>
+                    </span>
+                    <div className="flex items-center justify-center h-full w-[46px] -mr-5 bg-brand-accent transition-colors duration-300 group-hover:bg-[#ff4500]">
+                      <span className="text-white text-xs font-semibold">›</span>
+                    </div>
+                  </a>
+                </div>
+
+                <div className="border-t border-b border-white/10 py-6">
+                  <div className="flex items-center justify-between mb-4 font-mono text-[9px] tracking-widest uppercase text-white/60">
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-[4px] w-[4px] bg-brand-accent inline-block" />
+                      <span>ARMIA</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-white/50 text-xs font-serif">
+                      <span>𝕏</span>
+                      <span>in</span>
+                      <span>🌐</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 font-mono text-[9px] md:text-[10px] uppercase">
+                    <div className="grid grid-cols-12 gap-2 text-white/60">
+                      <span className="col-span-4 text-white/40">PROFESSION</span>
+                      <span className="col-span-8 text-white font-medium">ENTERPRISE-GRADE ENGINEERING SINCE 2004.</span>
+                    </div>
+                    <div className="grid grid-cols-12 gap-2 text-white/60">
+                      <span className="col-span-4 text-white/40">LOCATION</span>
+                      <span className="col-span-8 text-white font-medium">KOCHI, INDIA</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Brand Logo */}
+              <div className="pt-8 mt-auto border-t border-white/10">
+                <div className="relative h-14 md:h-20 w-60 md:w-80 mb-6 flex items-center">
                   <Image
-                    src="/images/engineering_team.png"
-                    alt="Armia Leadership & Engineering"
+                    src="/images/armialogo.svg"
+                    alt="Armia Systems Logo"
                     fill
-                    className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                    className="object-contain object-left"
                   />
                 </div>
-                <a
-                  href="mailto:hello@armiasystems.com"
-                  className="flex items-center justify-between bg-[#111111] text-white h-[46px] px-5 font-mono text-[10px] md:text-[11px] tracking-[0.16em] uppercase transition-colors duration-300 hover:bg-black group-hover:bg-[#151515]"
-                >
-                  <span className="font-medium text-white/90">
-                    GET IN TOUCH <span className="text-white/40 font-light">\ ARMIA</span>
-                  </span>
-                  <div className="flex items-center justify-center h-full w-[46px] -mr-5 bg-brand-accent transition-colors duration-300 group-hover:bg-[#ff4500]">
-                    <span className="text-white text-xs font-semibold">›</span>
-                  </div>
-                </a>
-              </div>
 
-              <div className="border-t border-b border-white/10 py-6 mb-12">
-                <div className="flex items-center justify-between mb-4 font-mono text-[9px] tracking-widest uppercase text-white/60">
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-[4px] w-[4px] bg-brand-accent inline-block" />
-                    <span>ARMIA</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-white/50 text-xs font-serif">
-                    <span>𝕏</span>
-                    <span>in</span>
-                    <span>🌐</span>
-                  </div>
+                <div className="font-mono text-[9px] text-white/40 uppercase tracking-widest leading-relaxed">
+                  <div>© {new Date().getFullYear()} ARMIA SYSTEMS INC. ALL RIGHTS RESERVED.</div>
                 </div>
-
-                <div className="space-y-3 font-mono text-[9px] md:text-[10px] uppercase">
-                  <div className="grid grid-cols-12 gap-2 text-white/60">
-                    <span className="col-span-4 text-white/40">PROFESSION</span>
-                    <span className="col-span-8 text-white font-medium">ENTERPRISE-GRADE ENGINEERING SINCE 2004.</span>
-                  </div>
-                  <div className="grid grid-cols-12 gap-2 text-white/60">
-                    <span className="col-span-4 text-white/40">LOCATION</span>
-                    <span className="col-span-8 text-white font-medium">KOCHI, INDIA</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Brand Logo */}
-            <div className="pt-8">
-              <div className="relative h-14 md:h-20 w-60 md:w-80 mb-6 flex items-center">
-                <Image
-                  src="/images/armialogo.svg"
-                  alt="Armia Systems Logo"
-                  fill
-                  className="object-contain object-left"
-                />
-              </div>
-
-              <div className="font-mono text-[9px] text-white/40 uppercase tracking-widest leading-relaxed">
-                <div>© {new Date().getFullYear()} ARMIA SYSTEMS INC. ALL RIGHTS RESERVED.</div>
               </div>
             </div>
           </motion.div>
@@ -113,30 +115,32 @@ export function FooterSection() {
           {/* Right Column — Contact Form & Links */}
           <div className="lg:col-span-8 p-6 md:p-12 lg:p-16 flex flex-col justify-between bg-[#0a0a0a]">
             <div>
-              {/* Section number added — page.tsx already labels this "Section 09", the
-                  markup just never surfaced it like every other section does. */}
-              <SectionEyebrow number="09" label="CONTACT" dark />
+              {/* Section number 10 */}
+              <SectionEyebrow number="10" label="CONTACT" dark />
 
-              <TypewriterText
-                text={"BUILD YOUR\nNEXT PROJECT\nWITH ARMIA."}
-                className="font-sans text-[clamp(2.6rem,4.5vw,5.5rem)] font-bold tracking-[-0.04em] leading-[0.94] text-white uppercase max-w-3xl mb-8"
-              />
+              <div className="mb-8">
+                <h2 className="font-sans text-[clamp(2.8rem,4.8vw,5.6rem)] font-bold tracking-[-0.04em] leading-[0.92] text-[#e5e5e5] uppercase max-w-3xl">
+                  <span className="block">BUILD YOUR</span>
+                  <span className="block">NEXT PROJECT</span>
+                  <span className="block">WITH ARMIA.</span>
+                </h2>
+              </div>
 
               <motion.div
                 initial={{ opacity: 0, y: "15%" }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={VIEWPORT_ONCE}
-                transition={{ duration: 0.8, ease: EASE_CUSTOM, delay: 0.8 }}
-                className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-12 border-b border-white/10 pb-8"
+                transition={{ duration: 0.8, ease: EASE_CUSTOM, delay: 0.2 }}
+                className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-10 border-b border-white/10 pb-6"
               >
                 <p className="font-mono text-[10px] md:text-[11px] tracking-wider text-white/60 uppercase leading-relaxed max-w-lg">
                   FROM FIRST CONCEPT TO FINAL BUILD, WE CREATE ENTERPRISE SOFTWARE WITH CLEAR ARCHITECTURE &amp; RELIABLE DELIVERY.
                 </p>
-                <div className="flex gap-1 text-brand-accent">
+                <div className="flex gap-1 text-brand-accent select-none">
                   <span className="h-1.5 w-1.5 bg-brand-accent inline-block" />
                   <span className="h-1.5 w-1.5 bg-brand-accent inline-block" />
                   <span className="h-1.5 w-1.5 bg-brand-accent inline-block" />
-                  <span className="h-1.5 w-1.5 bg-brand-accent/40 inline-block" />
+                  <span className="h-1.5 w-1.5 bg-white/20 inline-block" />
                 </div>
               </motion.div>
 
@@ -147,51 +151,53 @@ export function FooterSection() {
                 whileInView={{ opacity: 1 }}
                 transition={{ duration: 0.8, ease: EASE_CUSTOM, delay: 1.0 }}
                 viewport={VIEWPORT_ONCE}
-                className="space-y-6 mb-16 max-w-4xl"
+                className="space-y-6 mb-12 max-w-4xl"
               >
-                <div>
-                  <label className="flex items-center gap-1.5 font-mono text-[9px] md:text-[10px] tracking-widest text-white/60 uppercase mb-2">
-                    <span className="h-1 w-1 bg-brand-accent inline-block" />
-                    <span>YOUR NAME</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Jane Smith"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full bg-[#161616] text-white font-mono text-xs px-5 py-4 border border-white/10 rounded-none focus:outline-none focus:border-brand-accent placeholder:text-white/30 transition-colors duration-200"
-                  />
-                </div>
+                <div className="space-y-6 mb-10 max-w-4xl">
+                  <div className="pt-2">
+                    <label className="flex items-center gap-1.5 font-mono text-[9px] md:text-[10px] tracking-widest text-[#888888] uppercase mb-2">
+                      <span className="h-1 w-1 bg-brand-accent inline-block" />
+                      <span>YOUR NAME</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Jane Smith"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full bg-[#121212]/70 text-white font-mono text-xs px-5 py-3.5 border border-white/[0.07] rounded-none focus:outline-none focus:border-brand-accent placeholder:text-white/20 transition-colors duration-200"
+                    />
+                  </div>
 
-                <div>
-                  <label className="flex items-center gap-1.5 font-mono text-[9px] md:text-[10px] tracking-widest text-white/60 uppercase mb-2">
-                    <span className="h-1 w-1 bg-brand-accent inline-block" />
-                    <span>EMAIL ADDRESS</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="hello@armiasystems.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full bg-[#161616] text-white font-mono text-xs px-5 py-4 border border-white/10 rounded-none focus:outline-none focus:border-brand-accent placeholder:text-white/30 transition-colors duration-200"
-                  />
-                </div>
+                  <div>
+                    <label className="flex items-center gap-1.5 font-mono text-[9px] md:text-[10px] tracking-widest text-[#888888] uppercase mb-2">
+                      <span className="h-1 w-1 bg-brand-accent inline-block" />
+                      <span>EMAIL ADDRESS</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="hello@armiasystems.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full bg-[#121212]/70 text-white font-mono text-xs px-5 py-3.5 border border-white/[0.07] rounded-none focus:outline-none focus:border-brand-accent placeholder:text-white/20 transition-colors duration-200"
+                    />
+                  </div>
 
-                <div>
-                  <label className="flex items-center gap-1.5 font-mono text-[9px] md:text-[10px] tracking-widest text-white/60 uppercase mb-2">
-                    <span className="h-1 w-1 bg-brand-accent inline-block" />
-                    <span>HOW CAN I HELP?</span>
-                  </label>
-                  <textarea
-                    rows={4}
-                    required
-                    placeholder="Tell us about your project ..."
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full bg-[#161616] text-white font-mono text-xs px-5 py-4 border border-white/10 rounded-none focus:outline-none focus:border-brand-accent placeholder:text-white/30 resize-none transition-colors duration-200"
-                  />
+                  <div>
+                    <label className="flex items-center gap-1.5 font-mono text-[9px] md:text-[10px] tracking-widest text-[#888888] uppercase mb-2">
+                      <span className="h-1 w-1 bg-brand-accent inline-block" />
+                      <span>HOW CAN I HELP?</span>
+                    </label>
+                    <textarea
+                      rows={4}
+                      required
+                      placeholder="Tell us about your project ..."
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      className="w-full bg-[#121212]/70 text-white font-mono text-xs px-5 py-3.5 border border-white/[0.07] rounded-none focus:outline-none focus:border-brand-accent placeholder:text-white/20 resize-none transition-colors duration-200"
+                    />
+                  </div>
                 </div>
 
                 <div className="pt-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">

@@ -5,6 +5,7 @@ import { ServicesSection } from "@/components/sections/ServicesSection";
 import { ProcessSection } from "@/components/sections/ProcessSection";
 import { PortfolioServicesSection } from "@/components/sections/PortfolioServicesSection";
 import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
+import { AwardsSection } from "@/components/sections/AwardsSection";
 import { FAQSection } from "@/components/sections/FAQSection";
 import { BlogSection } from "@/components/sections/BlogSection";
 import { FooterSection } from "@/components/sections/FooterSection";
@@ -33,13 +34,16 @@ export default function Home() {
       {/* 6. Section 06 — Trusted by Engineering Leaders */}
       <TestimonialsSection />
 
-      {/* 7. Section 07 — Frequently Asked Questions */}
+      {/* 7. Section 07 — Awards & Industry Recognition */}
+      <AwardsSection />
+
+      {/* 8. Section 08 — Frequently Asked Questions */}
       <FAQSection />
 
-      {/* 8. Section 08 — Insights & Engineering Blog */}
+      {/* 9. Section 09 — Insights & Engineering Blog */}
       <BlogSection />
 
-      {/* 9. Section 09 — Global Offices & Footer */}
+      {/* 10. Section 10 — Global Offices & Footer */}
       <FooterSection />
     </main>
   );

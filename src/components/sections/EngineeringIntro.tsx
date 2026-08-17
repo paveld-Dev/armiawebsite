@@ -19,9 +19,6 @@ export function EngineeringIntro() {
       className="relative z-10 w-full h-[80vh] min-h-[80vh] max-h-[864px] bg-white text-foreground select-none snap-section flex flex-col justify-between overflow-hidden"
       aria-label="Mission Statement"
     >
-      <div className="absolute inset-0 pointer-events-none z-0 opacity-40">
-        <GridLines light />
-      </div>
       <div className="relative z-10 mx-auto w-full h-full flex flex-col justify-between">
         <EngineeringStatement />
       </div>
