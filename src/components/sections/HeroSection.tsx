@@ -132,10 +132,10 @@ export function HeroSection() {
 
       <motion.div
         style={{ y: reducedMotion ? 0 : titleY, opacity: reducedMotion ? 1 : titleOpacity }}
-        className="absolute left-6 md:left-[49.8%] right-6 md:right-[11.2%] top-[50%] md:top-[52%] z-10 pointer-events-none"
+        className="absolute left-6 md:left-[49.8%] right-6 md:right-[11.2%] top-[55%] md:top-[58%] z-10 pointer-events-none"
       >
         <div className="leading-none select-none w-full">
-          <h1 className="flex justify-between items-baseline w-full font-sans font-normal text-[clamp(6rem,13.2vw,16.5rem)] tracking-[-0.035em] leading-[0.76] text-white">
+          <h1 className="flex justify-between items-baseline w-full font-sans font-normal text-[clamp(4rem,8.2vw,9.8rem)] tracking-tight leading-[0.82] text-white">
             {titleLetters.map((char, index) => (
               <span key={index} className="inline-block overflow-hidden">
                 <motion.span
