@@ -34,7 +34,7 @@ export function EngineeringStatement() {
   };
 
   return (
-    <div className="relative flex flex-col justify-between h-full py-6 md:py-8 pl-[clamp(28px,3vw,56px)] pr-[clamp(32px,5vw,84px)] select-none overflow-hidden">
+    <div className="relative flex flex-col justify-between h-full py-6 md:py-8 content-inset select-none overflow-hidden">
 
       {/* ── Background Spiral Ribbon Element (Starts Middle -> Rotates, Shrinks & Shifts Right) ── */}
       <motion.div

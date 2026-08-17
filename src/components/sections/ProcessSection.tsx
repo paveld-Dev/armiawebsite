@@ -52,7 +52,16 @@ const phases = [
 ];
 
 export function ProcessSection() {
-  const { activeIndex, setActiveIndex, activeItem: phase } = useRotator(phases);
+  const {
+    activeIndex,
+    setActiveIndex,
+    activeItem: phase,
+    setIsPaused,
+    autoAdvance,
+    intervalMs,
+    timerKey,
+    isPaused,
+  } = useRotator(phases, { autoAdvance: true, intervalMs: 4500 });
 
   return (
     <section className="relative w-full bg-[#101010] text-[#f3f3f0] h-[100svh] min-h-[100svh] py-10 md:py-14 flex flex-col justify-center overflow-hidden select-none snap-section">
@@ -89,14 +98,22 @@ export function ProcessSection() {
         {/* 2-Column Main Content: Rotator Spotlight on Left, Persistent CTA on Right */}
         <div className="relative w-full flex flex-col md:flex-row items-stretch">
           {/* Left Column: Tab Strip + Phase Spotlight (30.3% to 69.3% -> width: 39.0%) */}
-          <div className="w-full md:w-[39.0%] md:ml-[30.3%] flex flex-col justify-between pr-0 md:pr-8">
-            {/* Tab Strip */}
+          <div
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            className="w-full md:w-[39.0%] md:ml-[30.3%] flex flex-col justify-between pr-0 md:pr-8"
+          >
+            {/* Tab Strip with active tab progress fill */}
             <div className="mb-4">
               <RotatorTabStrip
                 items={phases.map((p) => ({ id: p.id, label: p.id }))}
                 activeIndex={activeIndex}
                 onSelect={setActiveIndex}
                 dark
+                autoAdvance={autoAdvance}
+                intervalMs={intervalMs}
+                timerKey={timerKey}
+                isPaused={isPaused}
               />
             </div>
 

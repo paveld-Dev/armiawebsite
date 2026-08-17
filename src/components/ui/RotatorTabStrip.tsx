@@ -17,6 +17,10 @@ interface RotatorTabStripProps {
   layoutIdPrefix?: string;
   className?: string;
   dark?: boolean;
+  autoAdvance?: boolean;
+  intervalMs?: number;
+  timerKey?: number;
+  isPaused?: boolean;
 }
 
 export function RotatorTabStrip({
@@ -27,6 +31,10 @@ export function RotatorTabStrip({
   layoutIdPrefix = "rotator-tab",
   className = "",
   dark = false,
+  autoAdvance = false,
+  intervalMs = 4500,
+  timerKey = 0,
+  isPaused = false,
 }: RotatorTabStripProps) {
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
@@ -49,7 +57,7 @@ export function RotatorTabStrip({
               role="tab"
               aria-selected={isActive}
               onClick={() => onSelect(idx)}
-              className={`relative w-11 h-11 md:w-12 md:h-12 flex items-center justify-center font-mono text-[11px] md:text-xs tracking-wider transition-colors duration-200 cursor-pointer select-none rounded-none border ${
+              className={`relative w-11 h-11 md:w-12 md:h-12 flex items-center justify-center font-mono text-[11px] md:text-xs tracking-wider transition-colors duration-200 cursor-pointer select-none rounded-none border overflow-hidden ${
                 dark
                   ? isActive
                     ? "border-[#FF5C00] text-[#FF5C00] font-bold"
@@ -59,21 +67,37 @@ export function RotatorTabStrip({
                   : "border-black/16 text-black/45 hover:border-[#FF5C00]/60 hover:text-[#111111]"
               }`}
             >
-              {/* Active orange outline moves between tabs via layoutId */}
+              {/* Active orange outline */}
               {isActive && (
                 <motion.div
                   layoutId={`${layoutIdPrefix}-active-outline`}
                   transition={{ duration: 0.35, ease: EASE_CUSTOM }}
-                  className="absolute inset-0 border-[1.5px] md:border-2 border-[#FF5C00] pointer-events-none"
+                  className="absolute inset-0 border-[1.5px] md:border-2 border-[#FF5C00] pointer-events-none z-10"
                 />
               )}
+
+              {/* Active-tab timed progress fill at bottom of button */}
+              {isActive && autoAdvance && (
+                <motion.div
+                  key={`${activeIndex}-${timerKey}`}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: isPaused ? undefined : 1 }}
+                  transition={{
+                    duration: intervalMs / 1000,
+                    ease: "linear",
+                  }}
+                  style={{ transformOrigin: "left" }}
+                  className="absolute bottom-0 left-0 right-0 h-[2px] md:h-[3px] bg-[#FF5C00] z-20 pointer-events-none"
+                />
+              )}
+
               <span className="relative z-10">{label}</span>
             </button>
           );
         })}
       </div>
 
-      {/* 1px Scroll Progress Indicator Line */}
+      {/* 1px Scroll / Overall Tab Indicator Line */}
       <div
         className={`relative w-full max-w-[240px] md:max-w-[280px] h-[1px] ${
           dark ? "bg-white/15" : "bg-black/15"

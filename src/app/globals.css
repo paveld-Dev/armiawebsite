@@ -82,3 +82,9 @@ body {
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
+
+/* Shared Section Content Inset */
+.content-inset {
+  padding-left: clamp(34px, 3vw, 58px);
+  padding-right: clamp(40px, 5vw, 90px);
+}
