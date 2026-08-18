@@ -8,11 +8,13 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { EASE_CUSTOM } from "@/lib/motion";
 import { GridLines } from "@/components/ui/GridLines";
 import { PartnerTicker } from "@/components/sections/PartnerTicker";
+import { useAppReady } from "@/hooks/useAppReady";
 
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { x } = useMousePosition();
   const reducedMotion = useReducedMotion();
+  const isAppReady = useAppReady();
 
   const bgScale = 1.02;
   const bgY = "0%";
@@ -41,7 +43,7 @@ export function HeroSection() {
       transition: {
         duration: 0.95,
         ease: EASE_CUSTOM,
-        delay: 0.28 + i * 0.035,
+        delay: 0.15 + i * 0.04,
       },
     }),
   };
@@ -99,7 +101,7 @@ export function HeroSection() {
         >
           <p className="font-normal text-white">CUSTOM SOFTWARE, MOBILE &amp; WEB</p>
           <p className="font-normal text-white">DEVELOPMENT</p>
-          <p className="text-white/60">SINCE 2001</p>
+          <p className="text-white/60">SINCE 2004</p>
           <div className="h-1.5 w-1.5 bg-brand-accent mt-3" aria-hidden />
         </motion.div>
       </motion.div>
@@ -141,7 +143,7 @@ export function HeroSection() {
                 <motion.span
                   custom={index}
                   initial="hidden"
-                  animate="visible"
+                  animate={isAppReady ? "visible" : "hidden"}
                   variants={letterVariants}
                   className="inline-block"
                 >
