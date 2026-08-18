@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { EASE_CUSTOM } from "@/lib/motion";
 import { dispatchAppReady } from "@/hooks/useAppReady";
 
-const TOTAL_DURATION_MS = 1100;
+const TOTAL_DURATION_MS = 2000;
 
 // Exact SVG Vector Path for the Armia Logo 'A'
 const ARMIA_A_PATH =
