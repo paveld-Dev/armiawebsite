@@ -240,7 +240,7 @@ export function PortfolioServicesSection() {
   return (
     <section
       ref={containerRef}
-      className="relative z-20 w-full bg-white text-[#111111] h-[1080px] min-h-[1080px] py-10 md:py-14 flex flex-col justify-center overflow-hidden snap-section select-none"
+      className="relative z-20 w-full bg-white text-[#111111] h-[100svh] min-h-[100svh] py-10 md:py-14 flex flex-col justify-center overflow-hidden snap-section select-none"
     >
       <div className="w-full max-w-[1920px] mx-auto px-6 md:px-0 relative z-10">
         {/* Upper Header Row matching ServicesSection Grid Columns */}

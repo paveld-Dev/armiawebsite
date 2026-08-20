@@ -13,7 +13,7 @@ interface FAQItemProps {
 
 export function FAQItem({ item, isOpen, onToggle }: FAQItemProps) {
   return (
-    <div className="relative z-10 bg-[#161616] border-b border-white/[0.08]">
+    <div className="relative z-10 bg-neutral-50/50 border-b border-black/[0.08]">
       <h3>
         <button
           type="button"
@@ -21,7 +21,7 @@ export function FAQItem({ item, isOpen, onToggle }: FAQItemProps) {
           aria-expanded={isOpen}
           aria-controls={`faq-answer-${item.id}`}
           id={`faq-button-${item.id}`}
-          className="group flex items-center justify-between w-full py-4 md:py-5 px-4 md:px-6 text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-brand-accent min-h-[56px] md:min-h-[68px] bg-[#161616] hover:bg-[#1a1a1a] transition-colors"
+          className="group flex items-center justify-between w-full py-4 md:py-5 px-4 md:px-6 text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-brand-accent min-h-[56px] md:min-h-[68px] bg-white hover:bg-neutral-50 transition-colors"
         >
           <div className="flex items-center gap-3 md:gap-4 pr-4">
             {/* Active Orange Square Marker */}
@@ -35,20 +35,20 @@ export function FAQItem({ item, isOpen, onToggle }: FAQItemProps) {
             </div>
 
             {/* Question Number */}
-            <span className="font-mono text-xs text-[#777777] font-normal w-[30px] shrink-0 group-hover:text-brand-accent transition-colors">
+            <span className="font-mono text-xs text-[#888888] font-normal w-[30px] shrink-0 group-hover:text-brand-accent transition-colors">
               {item.number}
             </span>
 
             {/* Question Text */}
             <span className={`font-sans text-[clamp(0.95rem,1vw,1.15rem)] font-medium tracking-[-0.015em] uppercase leading-[1.25] transition-colors ${
-              isOpen ? "text-white" : "text-[#d0d0cc] group-hover:text-white"
+              isOpen ? "text-[#111111]" : "text-[#444444] group-hover:text-[#111111]"
             }`}>
               {item.question}
             </span>
           </div>
 
           {/* Toggle icon */}
-          <div className="relative w-11 h-11 flex items-center justify-center shrink-0 text-[#888888] group-hover:text-white transition-colors">
+          <div className="relative w-11 h-11 flex items-center justify-center shrink-0 text-[#888888] group-hover:text-[#111111] transition-colors">
             <motion.span
               animate={{ rotate: isOpen ? 45 : 0 }}
               transition={{ duration: 0.3, ease: EASE_CUSTOM }}
@@ -72,13 +72,13 @@ export function FAQItem({ item, isOpen, onToggle }: FAQItemProps) {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.38, ease: EASE_CUSTOM }}
-            className="overflow-hidden bg-[#161616]"
+            className="overflow-hidden bg-neutral-50/70"
           >
             <div className="pb-6 pt-1 pl-[64px] md:pl-[78px] pr-6 md:pr-12 max-w-[680px] max-h-[140px] md:max-h-[160px] overflow-y-auto">
               {item.answer.map((paragraph, pIdx) => (
                 <p
                   key={pIdx}
-                  className="font-sans text-[14px] md:text-[15px] leading-[1.55] text-[#a4a4a2] mb-2.5 last:mb-0"
+                  className="font-sans text-[14px] md:text-[15px] leading-[1.55] text-[#555555] mb-2.5 last:mb-0"
                 >
                   {paragraph}
                 </p>

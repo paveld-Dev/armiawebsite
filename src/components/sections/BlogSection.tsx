@@ -13,7 +13,7 @@ export function BlogSection() {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   return (
-    <section className="relative w-full bg-white text-[#111111] h-[1080px] min-h-[1080px] border-t border-black/[0.08] select-none snap-section flex flex-col justify-between overflow-hidden py-10 md:py-14">
+    <section className="relative w-full bg-white text-[#111111] h-[100svh] min-h-[100svh] border-t border-black/[0.08] select-none snap-section flex flex-col justify-between overflow-hidden py-10 md:py-14">
       <GridLines light />
       
       {/* ── Top Header Area (Matching 10.8% / 30.3% / 69.3% Grid) ── */}

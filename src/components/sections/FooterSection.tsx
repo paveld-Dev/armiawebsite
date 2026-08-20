@@ -30,7 +30,11 @@ export function FooterSection() {
   };
 
   return (
-    <footer id="contact" className="relative w-full bg-[#0a0a0a] text-white pt-0 pb-12 overflow-hidden select-none border-t-[3px] border-brand-accent">
+    <footer
+      id="contact"
+      data-theme="dark"
+      className="relative w-full bg-[#0a0a0a] text-white pt-0 pb-12 overflow-hidden select-none border-t-[3px] border-brand-accent"
+    >
       <GridLines />
 
       <div className="relative z-10 mx-auto max-w-[1920px] w-full">

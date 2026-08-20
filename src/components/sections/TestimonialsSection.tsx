@@ -67,7 +67,7 @@ const testimonialReveal = (index: number) => ({
 
 export function TestimonialsSection() {
   return (
-    <section className="relative z-20 w-full bg-white text-[#111111] py-10 md:py-14 border-t border-black/[0.08] overflow-hidden select-none snap-section h-[1080px] min-h-[1080px] flex flex-col justify-center">
+    <section className="relative z-20 w-full bg-white text-[#111111] py-10 md:py-14 border-t border-black/[0.08] overflow-hidden select-none snap-section h-[100svh] min-h-[100svh] flex flex-col justify-center">
       <GridLines light />
 
       <div className="w-full max-w-[1920px] mx-auto px-6 md:px-0 relative z-10">
