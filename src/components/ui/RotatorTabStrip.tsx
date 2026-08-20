@@ -57,7 +57,7 @@ export function RotatorTabStrip({
               role="tab"
               aria-selected={isActive}
               onClick={() => onSelect(idx)}
-              className={`relative w-11 h-11 md:w-12 md:h-12 flex items-center justify-center font-mono text-[11px] md:text-xs tracking-wider transition-colors duration-200 cursor-pointer select-none rounded-none border overflow-hidden ${
+              className={`relative w-11 h-11 md:w-12 md:h-12 flex items-center justify-center font-mono text-[11px] md:text-xs tracking-wider border transition-colors duration-200 cursor-pointer select-none rounded-none overflow-hidden ${
                 dark
                   ? isActive
                     ? "border-[#FF5C00] text-[#FF5C00] font-bold"
@@ -67,15 +67,6 @@ export function RotatorTabStrip({
                   : "border-black/16 text-black/45 hover:border-[#FF5C00]/60 hover:text-[#111111]"
               }`}
             >
-              {/* Active orange outline */}
-              {isActive && (
-                <motion.div
-                  layoutId={`${layoutIdPrefix}-active-outline`}
-                  transition={{ duration: 0.35, ease: EASE_CUSTOM }}
-                  className="absolute inset-0 border-[1.5px] md:border-2 border-[#FF5C00] pointer-events-none z-10"
-                />
-              )}
-
               {/* Active-tab timed progress fill at bottom of button */}
               {isActive && autoAdvance && (
                 <motion.div

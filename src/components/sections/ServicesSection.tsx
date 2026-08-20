@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { EASE_CUSTOM } from "@/lib/motion";
 import { GridLines } from "@/components/ui/GridLines";
@@ -11,6 +12,8 @@ const services = [
     id: "01",
     title: "CUSTOM SOFTWARE DEVELOPMENT",
     short: "Custom Software",
+    image: "/images/engineering_team.png",
+    tag: "CUSTOM // DEV",
     description:
       "Full-cycle custom web and enterprise application engineering. Built with high reliability, modular scalability, and modern stack standards for complex business requirements.",
     points: [
@@ -24,6 +27,8 @@ const services = [
     id: "02",
     title: "AI & MACHINE LEARNING",
     short: "AI & Machine Learning",
+    image: "/images/service_ai_intelligence.png",
+    tag: "AI // ML LABS",
     description:
       "Enterprise AI integration, custom LLM solutions, predictive modeling, and intelligent automation systems engineered for secure production environments.",
     points: [
@@ -37,6 +42,8 @@ const services = [
     id: "03",
     title: "CLOUD INFRASTRUCTURE",
     short: "Cloud Infrastructure",
+    image: "/images/service_cloud_devops.png",
+    tag: "CLOUD // DEVOPS",
     description:
       "Scalable cloud architecture, DevOps pipelines, containerization, and zero-downtime deployment systems engineered for 99.99% operational uptime.",
     points: [
@@ -50,6 +57,8 @@ const services = [
     id: "04",
     title: "UX & INTERFACE DESIGN",
     short: "UX & Interface Design",
+    image: "/images/service_brand_identity.png",
+    tag: "UI // UX DESIGN",
     description:
       "High-precision design systems, editorial UI/UX architecture, user research, and rapid prototyping for complex enterprise software products.",
     points: [
@@ -63,6 +72,8 @@ const services = [
 
 export function ServicesSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const activeService = openIndex !== null ? services[openIndex] : null;
 
   return (
     <section className="relative z-20 w-full bg-[#101010] text-[#f3f3f0] h-[1080px] min-h-[1080px] py-10 md:py-14 flex flex-col justify-center overflow-hidden snap-section">
@@ -94,8 +105,8 @@ export function ServicesSection() {
           </div>
 
           {/* Right Supporting Copy: 69.3% to 88.8% */}
-          <div className="w-full md:w-[19.5%] px-6 md:px-0 pt-1 flex justify-start">
-            <div className="flex flex-col gap-4">
+          <div className="relative w-full md:w-[19.5%] px-6 md:px-0 pt-1 flex flex-col justify-start">
+            <div className="flex flex-col gap-4 relative z-10">
               <p className="font-mono text-[10px] md:text-[11px] text-[#FF5C00] tracking-widest uppercase">
                 ARMIA SYSTEMS
               </p>
@@ -108,9 +119,43 @@ export function ServicesSection() {
           </div>
         </div>
 
-        {/* Accordion List */}
-        <div className="w-full md:w-[58.5%] md:ml-[30.3%] px-6 md:px-0">
-          <div className="border-t border-white/[0.06] flex flex-col">
+        {/* Lower Row: Left Image Aligned with Accordion (10.8% to 30.3% -> width: 19.5%) + Accordion (30.3% to 88.8% -> width: 58.5%) */}
+        <div className="relative w-full flex flex-col md:flex-row items-stretch">
+          {/* Left Column Image aligned with Accordion - Only rendered when an accordion item is open */}
+          <div className="hidden md:flex w-[19.5%] ml-[10.8%] pr-8 flex-col justify-start min-h-[220px]">
+            <AnimatePresence mode="wait">
+              {activeService && (
+                <motion.div
+                  key={activeService.id}
+                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -12, scale: 0.98 }}
+                  transition={{ duration: 0.35, ease: EASE_CUSTOM }}
+                  className="relative w-full aspect-[4/3] rounded-sm overflow-hidden border border-white/20 bg-[#181818] shadow-2xl group"
+                >
+                  <Image
+                    src={activeService.image}
+                    alt={activeService.title}
+                    fill
+                    sizes="(max-width: 1920px) 25vw, 380px"
+                    className="object-cover object-center brightness-100 contrast-105 group-hover:scale-105 transition-transform duration-700 ease-out"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#101010]/80 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
+                    <span className="font-mono text-[9px] tracking-widest uppercase text-white font-medium bg-black/80 px-2.5 py-1 backdrop-blur-md border border-white/20">
+                      {activeService.tag}
+                    </span>
+                    <span className="h-2 w-2 bg-[#FF5C00] shadow-[0_0_8px_#FF5C00]" aria-hidden />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Accordion List */}
+          <div className="w-full md:w-[58.5%] px-6 md:px-0">
+            <div className="border-t border-white/[0.06] flex flex-col">
             {services.map((service, index) => {
               const isOpen = openIndex === index;
               return (
@@ -170,6 +215,7 @@ export function ServicesSection() {
             })}
           </div>
         </div>
+      </div>
       </div>
     </section>
   );

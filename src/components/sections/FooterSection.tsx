@@ -84,7 +84,7 @@ export function FooterSection() {
                   <div className="space-y-3 font-mono text-[9px] md:text-[10px] uppercase">
                     <div className="grid grid-cols-12 gap-2 text-white/60">
                       <span className="col-span-4 text-white/40">PROFESSION</span>
-                      <span className="col-span-8 text-white font-medium">ENTERPRISE-GRADE ENGINEERING SINCE 2004.</span>
+                      <span className="col-span-8 text-white font-medium">ENTERPRISE-GRADE ENGINEERING SINCE 2001.</span>
                     </div>
                     <div className="grid grid-cols-12 gap-2 text-white/60">
                       <span className="col-span-4 text-white/40">LOCATION</span>

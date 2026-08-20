@@ -18,26 +18,7 @@ const NAV_ITEMS = [
 ] as const;
 
 export function Header() {
-  const [timeString, setTimeString] = useState("10:30 AM");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setTimeString(
-        now.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-          timeZone: "Asia/Kolkata",
-        })
-      );
-    };
-
-    updateTime();
-    const interval = setInterval(updateTime, 30_000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     if (!isMobileMenuOpen) return;
@@ -66,16 +47,6 @@ export function Header() {
               />
             </div>
           </Link>
-
-          <div className="hidden lg:flex items-center gap-1.5 font-mono text-[10px] md:text-[11px] tracking-wider uppercase text-white/90">
-            <span className="font-semibold text-white">Kochi,</span>
-            <span className="text-white/70">India</span>
-          </div>
-
-          <div className="hidden lg:flex items-center gap-2 font-mono text-[10px] md:text-[11px] tracking-wider uppercase text-white/90">
-            <span className="font-semibold text-white">{timeString}</span>
-            <span className="text-white/60">LOCAL TIME</span>
-          </div>
 
           <div className="flex items-center">
             <button

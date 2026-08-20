@@ -99,9 +99,9 @@ export function HeroSection() {
           transition={{ duration: 0.7, delay: 0.15, ease: EASE_CUSTOM }}
           className="font-mono text-[11px] md:text-xs tracking-[0.14em] uppercase text-white/90 space-y-1"
         >
-          <p className="font-normal text-white">CUSTOM SOFTWARE, MOBILE &amp; WEB</p>
-          <p className="font-normal text-white">DEVELOPMENT</p>
-          <p className="text-white/60">SINCE 2004</p>
+          <p className="font-normal text-white">END-TO-END SOFTWARE</p>
+          <p className="font-normal text-white">ENGINEERING</p>
+          <p className="text-white/60">SINCE 2001</p>
           <div className="h-1.5 w-1.5 bg-brand-accent mt-3" aria-hidden />
         </motion.div>
       </motion.div>
@@ -118,15 +118,15 @@ export function HeroSection() {
         >
           <div className="flex items-center gap-2">
             <span className="text-white/50">/01</span>
-            <span className="font-normal text-white">PRODUCTS</span>
+            <span className="font-normal text-white">CUSTOM SOFTWARE</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-white/50">/02</span>
-            <span className="font-normal text-white">SERVICES</span>
+            <span className="font-normal text-white">AI &amp; CLOUD</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-white/50">/03</span>
-            <span className="font-normal text-white">SOLUTIONS</span>
+            <span className="font-normal text-white">UX &amp; DESIGN</span>
           </div>
           <div className="h-1.5 w-1.5 bg-brand-accent mt-3" aria-hidden />
         </motion.div>
@@ -153,6 +153,15 @@ export function HeroSection() {
             ))}
           </h1>
         </div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 14 }}
+          animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+          transition={{ duration: 0.8, delay: 0.55, ease: EASE_CUSTOM }}
+          className="font-sans font-normal text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 leading-snug tracking-tight max-w-[540px] mt-4 md:mt-6"
+        >
+          Reliable software engineering, trusted by enterprise teams since 2001.
+        </motion.p>
       </motion.div>
 
       {/* Pinned Bottom Partner Ticker Bar */}

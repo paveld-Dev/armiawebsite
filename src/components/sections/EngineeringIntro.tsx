@@ -16,10 +16,11 @@ export function EngineeringIntro() {
   return (
     <section
       ref={containerRef}
-      className="relative z-10 w-full h-[80vh] min-h-[80vh] max-h-[864px] bg-white text-foreground select-none snap-section flex flex-col justify-between overflow-hidden"
+      className="relative z-10 w-full h-[75vh] bg-white text-foreground select-none"
       aria-label="Mission Statement"
     >
-      <div className="relative z-10 mx-auto w-full h-full flex flex-col justify-between">
+      {/* Sticky Fullscreen Viewport that stays locked while scrolling */}
+      <div className="sticky top-0 h-[100svh] w-full flex flex-col justify-between overflow-hidden">
         <EngineeringStatement />
       </div>
     </section>

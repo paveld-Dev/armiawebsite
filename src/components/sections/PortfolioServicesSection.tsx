@@ -76,6 +76,22 @@ const servicesData = [
       "High-availability disaster recovery architecture",
     ],
   },
+  {
+    id: "05",
+    num: "/05",
+    category: "EDTECH & INTERACTIVE MEDIA",
+    title: "Mazeflower",
+    image: "/images/Mazeflower.png",
+    caption:
+      "Interactive learning and creative content publishing platform with adaptive gamification engines.",
+    capabilities: [
+      "Gamified learning paths & progress telemetry",
+      "Cross-platform responsive canvas rendering",
+      "AI-driven dynamic curriculum recommendations",
+      "Secure cloud asset pipeline & instant streaming",
+      "Scalable multi-user collaborative experiences",
+    ],
+  },
 ];
 
 // Removed useWindowWidth and useReducedMotion as they were only used for the wheel interceptor.

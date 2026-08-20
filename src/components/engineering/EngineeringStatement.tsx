@@ -105,7 +105,7 @@ export function EngineeringStatement() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={VIEWPORT_ONCE}
               transition={{ duration: 0.7, delay: 0.6, ease: EASE_CUSTOM }}
-              className="space-y-3 font-sans text-[13px] md:text-[14px] lg:text-[15px] font-normal leading-[1.6] text-[#444444] max-w-[680px]"
+              className="space-y-3 font-sans text-[16px] md:text-[17px] lg:text-[18px] font-normal leading-[1.6] text-[#444444] max-w-[680px]"
             >
               <p>
                 Our strength lies in combining deep engineering expertise, continuous innovation and practical business understanding to deliver software that is built for real-world scale.

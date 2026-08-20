@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { EASE_CUSTOM } from "@/lib/motion";
 import { GridLines } from "@/components/ui/GridLines";
@@ -158,8 +159,22 @@ export function ProcessSection() {
 
           {/* Right Column: Persistent Orange CTA Card (69.3% to 88.8% -> width: 19.5%) */}
           <div className="w-full md:w-[19.5%] flex flex-col mt-6 md:mt-0">
-            <div className="relative bg-brand-accent p-6 md:p-7 flex flex-col justify-between h-full text-white">
-              <div>
+            <div className="relative bg-brand-accent p-6 md:p-7 flex flex-col justify-between h-full text-white overflow-hidden">
+              {/* Subtle decorative spiral ribbon accent */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-10 -right-10 w-[180px] md:w-[220px] aspect-square opacity-20 filter contrast-125"
+              >
+                <Image
+                  src="/images/spiral-ribbon.png"
+                  alt=""
+                  fill
+                  sizes="220px"
+                  className="object-contain"
+                />
+              </div>
+
+              <div className="relative z-10">
                 <h3 className="font-sans font-bold text-[22px] md:text-[26px] leading-[1.05] tracking-tight uppercase mb-3">
                   READY
                   <br />
@@ -194,7 +209,7 @@ export function ProcessSection() {
               {/* Compact CTA Button */}
               <a
                 href="#contact"
-                className="group bg-[#111111] text-white font-mono text-[9px] md:text-[10px] tracking-widest uppercase px-4 py-3 flex items-center justify-between hover:bg-black transition-colors w-full mt-2"
+                className="relative z-10 group bg-[#111111] text-white font-mono text-[9px] md:text-[10px] tracking-widest uppercase px-4 py-3 flex items-center justify-between hover:bg-black transition-colors w-full mt-2"
               >
                 <span>BOOK A CALL</span>
                 <div className="w-5 h-5 bg-white text-black flex items-center justify-center text-xs transition-transform duration-300 group-hover:translate-x-0.5">
