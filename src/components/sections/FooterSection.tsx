@@ -33,7 +33,7 @@ export function FooterSection() {
     <footer
       id="contact"
       data-theme="dark"
-      className="relative w-full bg-[#0a0a0a] text-white pt-0 pb-12 overflow-hidden select-none border-t-[3px] border-brand-accent"
+      className="relative w-full bg-black text-white pt-0 pb-12 overflow-hidden select-none border-t-[3px] border-brand-accent"
     >
       <GridLines />
 
@@ -46,7 +46,7 @@ export function FooterSection() {
             initial="hidden"
             whileInView="show"
             viewport={VIEWPORT_ONCE}
-            className="lg:col-span-4 p-6 md:p-10 lg:p-12 flex flex-col justify-between h-full bg-[#0a0a0a]"
+            className="lg:col-span-4 p-6 md:p-10 lg:p-12 flex flex-col justify-between h-full bg-black"
           >
             <div className="flex flex-col justify-between flex-1">
               <div>

@@ -25,32 +25,26 @@ export function BlogSection() {
           </div>
 
           {/* Heading Block: 30.3% to 69.3% */}
-          <div className="w-full md:w-[39.0%] px-6 md:px-0 pt-0.5 mb-6 md:mb-0">
-            <motion.h2
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="show"
-              viewport={VIEWPORT_ONCE}
-              className="font-sans text-[clamp(2.3rem,3.2vw,4.1rem)] font-normal tracking-[-0.04em] leading-[0.94] text-left uppercase text-[#111111]"
-            >
-              <span className="block text-[#777777]">INSIGHTS &</span>
-              <span className="block text-[#111111] font-medium">ENGINEERING BLOG.</span>
-            </motion.h2>
+          <div className="w-full md:w-[39.0%] px-6 md:px-0 pt-0.5 mb-4 md:mb-0">
+            <h2 className="font-sans text-[clamp(2.3rem,3.2vw,4.1rem)] font-normal tracking-[-0.04em] leading-[0.94] text-left">
+              <span className="block text-[#111111]">LATEST</span>
+              <span className="block text-[#6b6b6b] font-medium">INSIGHTS.</span>
+            </h2>
 
-            <p className="font-mono text-[10px] md:text-[11px] leading-relaxed text-[#666666] mt-4 md:mt-5 uppercase tracking-wide max-w-[280px]">
-              WE SHARE IDEAS, LESSONS, AND PRACTICAL INSIGHTS FROM OUR WORK.
+            <p className="font-mono text-[12px] md:text-[14px] leading-relaxed text-[#666666] mt-4 md:mt-5 uppercase tracking-wide max-w-[300px]">
+              ENGINEERING ARCHITECTURE, AI SYSTEMS &amp; TECH STRATEGY.
             </p>
           </div>
 
-          {/* Right Supporting Link: 69.3% to 88.8% */}
+          {/* Right Supporting Copy / Link: 69.3% to 88.8% */}
           <div className="w-full md:w-[19.5%] px-6 md:px-0 pt-1 flex justify-start">
             <div className="flex flex-col gap-4">
-              <Link
-                href="#all-articles"
-                className="font-mono text-[10px] md:text-[11px] text-[#ff5a00] tracking-widest uppercase hover:text-[#111111] transition-colors"
+              <a
+                href="#blog"
+                className="font-mono text-[12px] md:text-[14px] text-[#ff5a00] tracking-widest uppercase hover:text-[#111111] transition-colors"
               >
-                ALL ARTICLES →
-              </Link>
+                VIEW ALL ARTICLES →
+              </a>
             </div>
           </div>
         </div>
@@ -143,7 +137,7 @@ export function BlogSection() {
 
                     {/* Title */}
                     <Link href={article.href} className="block group/title">
-                      <h3 className="font-sans font-medium text-[13.5px] md:text-[14.5px] leading-[1.22] tracking-tight text-[#111111] mb-1.5 group-hover/title:text-brand-accent transition-colors line-clamp-2">
+                      <h3 className="font-sans font-medium text-[15px] md:text-[16px] leading-[1.3] tracking-tight text-[#111111] mb-1.5 group-hover/title:text-brand-accent transition-colors line-clamp-2">
                         {article.title}
                       </h3>
                     </Link>

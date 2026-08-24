@@ -153,6 +153,12 @@ body {
   overflow-x: hidden;
 }
 
+@media (pointer: fine) {
+  *, *::before, *::after, html, body, a, button, input, select, textarea {
+    cursor: none !important;
+  }
+}
+
 ::selection {
   background-color: #ff5a00;
   color: #ffffff;
@@ -885,36 +891,22 @@ export function Header() {
   useEffect(() => {
     // 1. Mark sections with explicit header themes
     const updateSectionTheme = () => {
-      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-      const heroThreshold = window.innerHeight * 0.7;
+      const headerLineY = 40; // top position where header sits
+      const x = window.innerWidth / 2;
+      
+      // 1. First test elements directly under the center of the header line
+      const elementsAtPoint = document.elementsFromPoint(x, headerLineY);
+      let matchedTheme: "hero" | "white" | "dark" | null = null;
 
-      if (scrollY < heroThreshold) {
-        setHeaderTheme("hero");
-        return;
-      }
-
-      // Check sections from document
-      const sections = Array.from(document.querySelectorAll("section, footer"));
-      const headerLineY = 50; // top position to sample
-
-      // Find which section covers the header top line
-      let matchedTheme: "white" | "dark" | null = null;
-      for (const sec of sections) {
-        const rect = sec.getBoundingClientRect();
-        // Check if header line intersects this section
-        if (rect.top <= headerLineY && rect.bottom > headerLineY) {
-          const explicitTheme = sec.getAttribute("data-theme");
+      for (const el of elementsAtPoint) {
+        const sec = el.closest("section, footer");
+        if (sec) {
+          const explicitTheme = sec.getAttribute("data-theme") as "hero" | "white" | "dark" | null;
+          if (explicitTheme) {
+            matchedTheme = explicitTheme;
+            break;
+          }
           const classList = sec.className || "";
-
-          if (explicitTheme === "dark") {
-            matchedTheme = "dark";
-            break;
-          }
-          if (explicitTheme === "white") {
-            matchedTheme = "white";
-            break;
-          }
-
           if (
             classList.includes("bg-[#101010]") ||
             classList.includes("bg-[#0a0a0a]") ||
@@ -925,26 +917,44 @@ export function Header() {
             matchedTheme = "dark";
             break;
           }
-
           if (classList.includes("bg-white")) {
             matchedTheme = "white";
-            break;
-          }
-
-          const bg = window.getComputedStyle(sec).backgroundColor;
-          const rgbMatch = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-          if (rgbMatch) {
-            const r = parseInt(rgbMatch[1], 10);
-            const g = parseInt(rgbMatch[2], 10);
-            const b = parseInt(rgbMatch[3], 10);
-            const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-            matchedTheme = luminance > 140 ? "white" : "dark";
             break;
           }
         }
       }
 
-      setHeaderTheme(matchedTheme || "white");
+      // 2. Fallback to bounding rect check across all sections
+      if (!matchedTheme) {
+        const sections = Array.from(document.querySelectorAll("section, footer"));
+        for (const sec of sections) {
+          const rect = sec.getBoundingClientRect();
+          if (rect.top <= headerLineY && rect.bottom > headerLineY) {
+            const explicitTheme = sec.getAttribute("data-theme") as "hero" | "white" | "dark" | null;
+            if (explicitTheme) {
+              matchedTheme = explicitTheme;
+              break;
+            }
+            const classList = sec.className || "";
+            if (
+              classList.includes("bg-[#101010]") ||
+              classList.includes("bg-[#0a0a0a]") ||
+              classList.includes("bg-[#090909]") ||
+              classList.includes("bg-surface-deep") ||
+              sec.tagName.toLowerCase() === "footer"
+            ) {
+              matchedTheme = "dark";
+              break;
+            }
+            if (classList.includes("bg-white")) {
+              matchedTheme = "white";
+              break;
+            }
+          }
+        }
+      }
+
+      setHeaderTheme(matchedTheme || "hero");
     };
 
     window.addEventListener("scroll", updateSectionTheme, { passive: true });
@@ -993,15 +1003,23 @@ export function Header() {
             ? "bg-transparent py-6 md:py-8 text-white"
             : isWhite
             ? "bg-white py-4 md:py-5 text-[#111111]"
-            : "bg-[#101010] py-4 md:py-5 text-white"
+            : "bg-black py-4 md:py-5 text-white"
         }`}
       >
-        <div className="w-full max-w-[1920px] mx-auto px-6 md:px-12 flex items-center justify-between">
+        {/* Subtle Noise Texture Overlay - Only in Hero mode */}
+        {isHero && (
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 opacity-[0.06] pointer-events-none mix-blend-overlay bg-[url('/images/Noise.png')]"
+          />
+        )}
+
+        <div className="relative z-10 w-full max-w-[1920px] mx-auto px-6 md:px-12 flex items-center justify-between">
           <Link
             href="/"
             className="group flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent rounded-sm"
           >
-            <div className="relative h-9 w-24 md:h-11 md:w-48 flex items-center transition-all duration-300">
+            <div className="relative h-11 w-32 md:h-14 md:w-60 flex items-center transition-all duration-300">
               <Image
                 src="/images/armialogo.svg"
                 alt="Armia Systems"
@@ -1648,22 +1666,62 @@ export function PageLoader() {
 `tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { useMousePosition } from "@/hooks/useMousePosition";
+import React, { useEffect, useState, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
+interface TrailLetter {
+  id: number;
+  x: number;
+  y: number;
+  char: string;
+  createdAt: number;
+}
+
+const TRAIL_CHARS = "ARMIA SYSTEMS";
+
 export function CursorFollower() {
-  const { x, y } = useMousePosition();
   const reducedMotion = useReducedMotion();
-  const [isHovered, setIsHovered] = useState(false);
+  const [letters, setLetters] = useState<TrailLetter[]>([]);
+  const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
   const [isVisible, setIsVisible] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const letterIndexRef = useRef(0);
+  const lastPosRef = useRef({ x: -100, y: -100 });
+  const idCounterRef = useRef(0);
 
   useEffect(() => {
-    // Only enable custom cursor on non-touch desktop devices
+    // Only enable on fine pointer desktop devices
     if (window.matchMedia("(pointer: fine)").matches) {
       setIsVisible(true);
     }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const currentX = e.clientX;
+      const currentY = e.clientY;
+      setCursorPos({ x: currentX, y: currentY });
+
+      const dx = currentX - lastPosRef.current.x;
+      const dy = currentY - lastPosRef.current.y;
+      const dist = Math.hypot(dx, dy);
+
+      // Spawn a new letter every ~16px of mouse travel
+      if (dist >= 16) {
+        lastPosRef.current = { x: currentX, y: currentY };
+        const char = TRAIL_CHARS[letterIndexRef.current % TRAIL_CHARS.length];
+        letterIndexRef.current += 1;
+        idCounterRef.current += 1;
+
+        const newLetter: TrailLetter = {
+          id: idCounterRef.current,
+          x: currentX,
+          y: currentY,
+          char: char === " " ? "•" : char,
+          createdAt: Date.now(),
+        };
+
+        setLetters((prev) => [...prev.slice(-24), newLetter]);
+      }
+    };
 
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -1680,30 +1738,85 @@ export function CursorFollower() {
       }
     };
 
+    // Clean up expired letters smoothly
+    const interval = setInterval(() => {
+      const now = Date.now();
+      setLetters((prev) => prev.filter((item) => now - item.createdAt < 750));
+    }, 45);
+
+    window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseover", handleMouseOver);
-    return () => window.removeEventListener("mouseover", handleMouseOver);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseover", handleMouseOver);
+      clearInterval(interval);
+    };
   }, []);
 
   if (reducedMotion || !isVisible) return null;
 
   return (
-    <motion.div
+    <div
       aria-hidden="true"
-      className="pointer-events-none fixed top-0 left-0 z-50 rounded-full border border-brand-accent/50 bg-brand-accent/10 mix-blend-difference hidden lg:block"
-      animate={{
-        x: x - (isHovered ? 24 : 16),
-        y: y - (isHovered ? 24 : 16),
-        width: isHovered ? 48 : 32,
-        height: isHovered ? 48 : 32,
-        scale: isHovered ? 1.2 : 1,
-      }}
-      transition={{
-        type: "spring",
-        stiffness: 400,
-        damping: 28,
-        mass: 0.2,
-      }}
-    />
+      className="pointer-events-none fixed inset-0 z-50 overflow-hidden select-none hidden lg:block"
+    >
+      {/* ── Clean Geometric Arrow Cursor (Armia Brand Orange) ── */}
+      <div
+        style={{
+          position: "fixed",
+          left: `${cursorPos.x}px`,
+          top: `${cursorPos.y}px`,
+          transform: `translate(-2px, -2px) scale(${isHovered ? 1.25 : 1})`,
+          transition: "transform 0.15s ease-out",
+        }}
+        className="pointer-events-none"
+      >
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 100 100"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="overflow-visible"
+        >
+          {/* Crisp, solid geometric polygon arrow silhouette */}
+          <polygon
+            points="14,14 88,50 52,58 44,92"
+            fill="#FF5A00"
+            stroke="#ffffff"
+            strokeWidth="3.5"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+
+      {/* ── Letter Trail Behind Cursor ── */}
+      {letters.map((item) => {
+        const age = Date.now() - item.createdAt;
+        const progress = Math.min(Math.max(age / 750, 0), 1);
+        const opacity = (1 - progress) * 0.85;
+        const scale = 1 - progress * 0.35;
+        const translateY = -progress * 12;
+
+        return (
+          <span
+            key={item.id}
+            style={{
+              position: "fixed",
+              left: `${item.x}px`,
+              top: `${item.y}px`,
+              opacity,
+              transform: `translate(-50%, calc(-50% + ${translateY}px)) scale(${scale})`,
+              transition: "opacity 0.08s linear, transform 0.08s linear",
+            }}
+            className="font-mono text-[10px] md:text-[11px] font-bold tracking-widest text-[#FF5A00] mix-blend-difference pointer-events-none"
+          >
+            {item.char}
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
@@ -1907,6 +2020,91 @@ import { GridLines } from "@/components/ui/GridLines";
 import { PartnerTicker } from "@/components/sections/PartnerTicker";
 import { useAppReady } from "@/hooks/useAppReady";
 
+// Realistic Typewriter Effect with natural cadence and blinking cursor
+function TypewriterEffect({
+  text,
+  delay = 0.5,
+  baseSpeed = 24,
+  showCursor = true,
+  cursorClassName = "bg-[#FF5A00]",
+  className = "",
+  onComplete,
+}: {
+  text: string;
+  delay?: number;
+  baseSpeed?: number;
+  showCursor?: boolean;
+  cursorClassName?: string;
+  className?: string;
+  onComplete?: () => void;
+}) {
+  const [displayText, setDisplayText] = useState("");
+  const [isTypingComplete, setIsTypingComplete] = useState(false);
+  const isAppReady = useAppReady();
+  const shouldReduceMotion = useReducedMotion();
+
+  React.useEffect(() => {
+    if (!isAppReady) return;
+
+    if (shouldReduceMotion) {
+      setDisplayText(text);
+      setIsTypingComplete(true);
+      if (onComplete) onComplete();
+      return;
+    }
+
+    let currentIndex = 0;
+    let timeoutId: NodeJS.Timeout;
+
+    const startTyping = () => {
+      const typeNextChar = () => {
+        if (currentIndex < text.length) {
+          currentIndex++;
+          setDisplayText(text.slice(0, currentIndex));
+
+          // Natural human cadence variation
+          const nextChar = text[currentIndex - 1];
+          let interval = baseSpeed + (Math.random() * 12 - 6);
+          if (nextChar === "," || nextChar === ".") interval += 90;
+          if (nextChar === " ") interval += 15;
+
+          timeoutId = setTimeout(typeNextChar, interval);
+        } else {
+          setIsTypingComplete(true);
+          if (onComplete) onComplete();
+        }
+      };
+
+      typeNextChar();
+    };
+
+    timeoutId = setTimeout(startTyping, delay * 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [text, delay, baseSpeed, isAppReady, shouldReduceMotion, onComplete]);
+
+  return (
+    <span className={className}>
+      {displayText}
+      {showCursor && (
+        <span
+          className={`inline-block ml-1 align-baseline transition-opacity duration-150 ${cursorClassName} ${
+            isTypingComplete ? "animate-pulse" : "opacity-100"
+          }`}
+          style={{
+            width: "0.12em",
+            height: "0.9em",
+            transform: "translateY(0.08em)",
+          }}
+          aria-hidden="true"
+        />
+      )}
+    </span>
+  );
+}
+
+import { useState } from "react";
+
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { x } = useMousePosition();
@@ -1915,12 +2113,6 @@ export function HeroSection() {
 
   const bgScale = 1.02;
   const bgY = "0%";
-
-  const titleY = 0;
-  const titleOpacity = 1;
-
-  const topMetaY = 0;
-  const rightMetaY = 0;
 
   const mouseXOffset = reducedMotion
     ? 0
@@ -1932,27 +2124,23 @@ export function HeroSection() {
       )
     );
 
-  const letterVariants = {
-    hidden: { y: "125%", opacity: 0 },
-    visible: (i: number) => ({
-      y: "0%",
-      opacity: 1,
-      transition: {
-        duration: 0.95,
-        ease: EASE_CUSTOM,
-        delay: 0.15 + i * 0.04,
-      },
-    }),
-  };
-
   const titleLetters = ["A", "R", "M", "I", "A"];
+
+  const services = [
+    { num: "/01", label: "CUSTOM SOFTWARE" },
+    { num: "/02", label: "AI & MACHINE LEARNING" },
+    { num: "/03", label: "CLOUD & DEVOPS" },
+    { num: "/04", label: "PRODUCT & UX" },
+  ];
 
   return (
     <section
       ref={containerRef}
-      className="relative w-full h-[100svh] overflow-hidden bg-surface-deep text-white select-none snap-section flex flex-col justify-between"
+      data-theme="hero"
+      className="sticky top-0 z-0 w-full h-[100svh] overflow-hidden bg-surface-deep text-white select-none snap-section flex flex-col justify-between"
       aria-label="Hero"
     >
+      {/* Ambient Video & Overlay */}
       <motion.div
         aria-hidden
         className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden"
@@ -1986,80 +2174,146 @@ export function HeroSection() {
 
       <GridLines />
 
-      <motion.div
-        style={{ y: reducedMotion ? 0 : topMetaY }}
-        className="absolute left-6 md:left-[49.8%] top-[40%] md:top-[46%] z-10 -translate-y-1/2 md:translate-y-0"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.15, ease: EASE_CUSTOM }}
-          className="font-mono text-[11px] md:text-xs tracking-[0.14em] uppercase text-white/90 space-y-1"
-        >
-          <p className="font-normal text-white">END-TO-END SOFTWARE</p>
-          <p className="font-normal text-white">ENGINEERING</p>
-          <p className="text-white/60">SINCE 2001</p>
-          <div className="h-1.5 w-1.5 bg-brand-accent mt-3" aria-hidden />
-        </motion.div>
-      </motion.div>
+      {/* ── Main Hero Content Area (Aligned to 10.8% - 88.8% Grid) ── */}
+      <div className="relative z-10 w-full max-w-[1920px] mx-auto px-6 md:px-0 pt-24 md:pt-28 flex-1 flex flex-col justify-center">
+        <div className="w-full flex flex-col md:flex-row items-start">
+          
+          {/* ── Left Column: Starts at 10.8% Grid Line, Ends at 69.3% (Width: 58.5%) ── */}
+          <div className="w-full md:w-[58.5%] md:ml-[10.8%] px-6 md:px-0 md:pr-10 flex flex-col">
+            
+            {/* Top Brand Name & Subtitle Header */}
+            <div className="w-full">
+              {/* Giant Spaced ARMIA Heading */}
+              <div className="leading-none select-none w-full max-w-[660px] my-1 overflow-hidden">
+                <h1 className="flex justify-between items-baseline w-full font-sans font-light text-[clamp(4.8rem,9.2vw,11.5rem)] tracking-[0.25em] leading-[0.82] text-white">
+                  {titleLetters.map((char, index) => (
+                    <span key={index} className="inline-block overflow-hidden py-1">
+                      <motion.span
+                        initial={{ y: "130%", opacity: 0, rotateX: 45, filter: "blur(8px)" }}
+                        animate={
+                          isAppReady
+                            ? { y: "0%", opacity: 1, rotateX: 0, filter: "blur(0px)" }
+                            : { y: "130%", opacity: 0, rotateX: 45, filter: "blur(8px)" }
+                        }
+                        transition={{
+                          duration: 1.1,
+                          ease: [0.16, 1, 0.3, 1],
+                          delay: 0.15 + index * 0.06,
+                        }}
+                        className="inline-block"
+                      >
+                        {char}
+                      </motion.span>
+                    </span>
+                  ))}
+                </h1>
+              </div>
 
-      <motion.div
-        style={{ y: reducedMotion ? 0 : rightMetaY }}
-        className="absolute right-6 md:right-auto md:left-[69.3%] top-[40%] md:top-[46%] z-10 -translate-y-1/2 md:translate-y-0"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.25, ease: EASE_CUSTOM }}
-          className="font-mono text-[11px] md:text-xs tracking-[0.14em] uppercase text-white/90 space-y-1.5"
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-white/50">/01</span>
-            <span className="font-normal text-white">CUSTOM SOFTWARE</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-white/50">/02</span>
-            <span className="font-normal text-white">AI &amp; CLOUD</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-white/50">/03</span>
-            <span className="font-normal text-white">UX &amp; DESIGN</span>
-          </div>
-          <div className="h-1.5 w-1.5 bg-brand-accent mt-3" aria-hidden />
-        </motion.div>
-      </motion.div>
+              {/* Subtitle: DIGITAL ENGINEERING with Smooth Typewriter Reveal */}
+              <div className="font-mono text-[13px] md:text-[16px] tracking-[0.55em] text-[#FF5A00] font-bold uppercase mb-4 mt-1 flex items-center">
+                <TypewriterEffect
+                  text="DIGITAL ENGINEERING"
+                  delay={0.4}
+                  baseSpeed={30}
+                  showCursor={true}
+                  cursorClassName="bg-[#FF5A00] h-4 w-1"
+                />
+              </div>
 
-      <motion.div
-        style={{ y: reducedMotion ? 0 : titleY, opacity: reducedMotion ? 1 : titleOpacity }}
-        className="absolute left-6 md:left-[49.8%] right-6 md:right-[11.2%] top-[55%] md:top-[58%] z-10 pointer-events-none"
-      >
-        <div className="leading-none select-none w-full">
-          <h1 className="flex justify-between items-baseline w-full font-sans font-normal text-[clamp(4rem,8.2vw,9.8rem)] tracking-tight leading-[0.82] text-white">
-            {titleLetters.map((char, index) => (
-              <span key={index} className="inline-block overflow-hidden">
-                <motion.span
-                  custom={index}
-                  initial="hidden"
-                  animate={isAppReady ? "visible" : "hidden"}
-                  variants={letterVariants}
-                  className="inline-block"
+              {/* Accent Orange Divider Line */}
+              <motion.div
+                initial={{ scaleX: 0, opacity: 0 }}
+                animate={isAppReady ? { scaleX: 1, opacity: 1 } : { scaleX: 0, opacity: 0 }}
+                transition={{ duration: 0.85, delay: 0.55, ease: EASE_CUSTOM }}
+                className="h-[1.5px] w-28 bg-[#FF5A00] origin-left mb-6 shadow-[0_0_12px_rgba(255,90,0,0.8)]"
+              />
+            </div>
+
+            {/* Bottom Value Content */}
+            <div className="w-full">
+              {/* Primary Value Statement Headline with Natural Typewriter Reveal */}
+              <h2 className="font-sans font-normal text-[clamp(1.6rem,2.6vw,2.8rem)] text-white leading-[1.18] tracking-tight max-w-[680px] mb-3 min-h-[70px] md:min-h-[90px]">
+                <TypewriterEffect
+                  text="We design and engineer custom software, AI products and cloud platforms for startups and enterprises."
+                  delay={0.65}
+                  baseSpeed={18}
+                  showCursor={true}
+                  cursorClassName="bg-white/80 h-7 md:h-8 w-1"
+                />
+              </h2>
+
+              {/* Supporting Lifecycle Summary with Staggered Entrance */}
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+                transition={{ duration: 0.8, delay: 1.25, ease: EASE_CUSTOM }}
+                className="font-sans text-[14px] md:text-[16px] text-white/75 leading-relaxed max-w-[580px] mb-8 font-light"
+              >
+                From strategy and UX to development, deployment and scale.
+              </motion.p>
+
+              {/* Interactive CTAs */}
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+                transition={{ duration: 0.8, delay: 1.4, ease: EASE_CUSTOM }}
+                className="flex items-center gap-6"
+              >
+                <a
+                  href="#contact"
+                  className="group border border-[#FF5A00] bg-black/40 hover:bg-[#FF5A00] text-white font-mono text-[11px] md:text-[12.5px] tracking-[0.18em] uppercase px-6 py-3.5 flex items-center gap-3 transition-all duration-300 backdrop-blur-sm shadow-[0_0_20px_rgba(255,90,0,0.15)] hover:shadow-[0_0_25px_rgba(255,90,0,0.45)]"
                 >
-                  {char}
-                </motion.span>
-              </span>
-            ))}
-          </h1>
-        </div>
+                  <span className="font-semibold">START A PROJECT</span>
+                  <span className="text-[#FF5A00] group-hover:text-white transition-transform duration-300 group-hover:translate-x-1 font-bold">
+                    ›
+                  </span>
+                </a>
 
-        <motion.p
-          initial={{ opacity: 0, y: 14 }}
-          animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
-          transition={{ duration: 0.8, delay: 0.55, ease: EASE_CUSTOM }}
-          className="font-sans font-normal text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 leading-snug tracking-tight max-w-[540px] mt-4 md:mt-6"
-        >
-          Reliable software engineering, trusted by enterprise teams since 2001.
-        </motion.p>
-      </motion.div>
+                <a
+                  href="#portfolio"
+                  className="font-mono text-[11px] md:text-[12.5px] tracking-[0.18em] uppercase text-white hover:text-[#FF5A00] underline underline-offset-4 transition-colors font-medium"
+                >
+                  EXPLORE OUR WORK
+                </a>
+              </motion.div>
+            </div>
+
+          </div>
+
+          {/* ── Right Column: Starts at 69.3% Grid Line, Ends at 88.8% (Width: 19.5%) ── */}
+          <div className="w-full md:w-[19.5%] px-6 md:px-0 hidden md:flex flex-col pt-8">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={isAppReady ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
+              transition={{ duration: 0.8, delay: 0.45, ease: EASE_CUSTOM }}
+              className="w-full flex flex-col divide-y divide-white/10 border-t border-white/10"
+            >
+              {services.map((item, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={isAppReady ? { opacity: 1, x: 0 } : { opacity: 0, x: 12 }}
+                  transition={{
+                    duration: 0.6,
+                    delay: 0.6 + idx * 0.08,
+                    ease: EASE_CUSTOM,
+                  }}
+                  className="py-3.5 flex items-center gap-4 group cursor-pointer"
+                >
+                  <span className="font-mono text-[11px] md:text-[12px] text-[#FF5A00] font-bold">
+                    {item.num}
+                  </span>
+                  <span className="font-mono text-[11px] md:text-[12.5px] tracking-[0.16em] uppercase text-white/90 group-hover:text-[#FF5A00] transition-colors">
+                    {item.label}
+                  </span>
+                </motion.div>
+              ))}
+            </motion.div>
+            <div className="h-1.5 w-1.5 bg-[#FF5A00] mt-4" />
+          </div>
+
+        </div>
+      </div>
 
       {/* Pinned Bottom Partner Ticker Bar */}
       <div className="relative z-20 w-full mt-auto">
@@ -2150,7 +2404,8 @@ export function EngineeringIntro() {
   return (
     <section
       ref={containerRef}
-      className="relative z-10 w-full h-[100svh] min-h-[100svh] bg-white text-foreground select-none snap-section flex flex-col justify-center overflow-hidden"
+      data-theme="white"
+      className="relative z-10 w-full h-[10svh] min-h-[85svh] bg-white text-foreground select-none snap-section flex flex-col justify-center overflow-hidden"
       aria-label="Mission Statement"
     >
       <EngineeringStatement />
@@ -2324,218 +2579,349 @@ import { EASE_CUSTOM } from "@/lib/motion";
 import { GridLines } from "@/components/ui/GridLines";
 import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 
-const services = [
+// ─────────────────────────────────────────────────────────────────────────────
+// Services Data
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface ServiceItem {
+  id: string;
+  num: string;
+  category: string;
+  titleLines: string[];
+  description: string;
+  capabilities: string[];
+  image: string;
+  video: string;
+}
+
+const servicesData: ServiceItem[] = [
   {
     id: "01",
-    title: "CUSTOM SOFTWARE DEVELOPMENT",
-    short: "Custom Software",
-    image: "/images/engineering_team.png",
-    tag: "CUSTOM // DEV",
+    num: "/01",
+    category: "ENGINEERING // ARCHITECTURE",
+    titleLines: ["CUSTOM SOFTWARE", "DEVELOPMENT"],
     description:
-      "Full-cycle custom web and enterprise application engineering. Built with high reliability, modular scalability, and modern stack standards for complex business requirements.",
-    points: [
+      "Full-cycle custom web and enterprise application engineering built for reliability, scalability and complex business requirements.",
+    capabilities: [
       "Full-stack web & mobile development",
       "Microservices & API architecture",
       "Legacy system modernization",
       "Cloud-native application design",
     ],
+    image: "/images/Service1.png",
+    video: "/images/service1.mp4",
   },
   {
     id: "02",
-    title: "AI & MACHINE LEARNING",
-    short: "AI & Machine Learning",
-    image: "/images/service_ai_intelligence.png",
-    tag: "AI // ML LABS",
+    num: "/02",
+    category: "AI & ML LABS",
+    titleLines: ["AI & MACHINE", "LEARNING"],
     description:
-      "Enterprise AI integration, custom LLM solutions, predictive modeling, and intelligent automation systems engineered for secure production environments.",
-    points: [
-      "Custom LLM integration & fine-tuning",
-      "Predictive analytics & forecasting",
-      "Computer vision & NLP solutions",
-      "MLOps & model deployment pipelines",
+      "Enterprise AI integration, custom LLM solutions, predictive systems and intelligent automation designed for secure production environments.",
+    capabilities: [
+      "AI product development",
+      "LLM & RAG applications",
+      "Intelligent automation",
+      "Predictive analytics",
     ],
+    image: "/images/service_ai_intelligence.png",
+    video: "/images/service2.mp4",
   },
   {
     id: "03",
-    title: "CLOUD INFRASTRUCTURE",
-    short: "Cloud Infrastructure",
-    image: "/images/service_cloud_devops.png",
-    tag: "CLOUD // DEVOPS",
+    num: "/03",
+    category: "CLOUD // DEVOPS",
+    titleLines: ["CLOUD & DEVOPS", "INFRASTRUCTURE"],
     description:
-      "Scalable cloud architecture, DevOps pipelines, containerization, and zero-downtime deployment systems engineered for 99.99% operational uptime.",
-    points: [
-      "AWS, Azure & GCP architecture",
-      "Kubernetes & container orchestration",
-      "Infrastructure as Code (Terraform)",
-      "Zero-downtime deployment strategies",
+      "Cloud infrastructure and DevOps systems engineered for performance, resilience, deployment speed and operational visibility.",
+    capabilities: [
+      "AWS & cloud architecture",
+      "CI/CD pipelines",
+      "Infrastructure automation",
+      "Monitoring & optimization",
     ],
+    image: "/images/service_cloud_devops.png",
+    video: "/images/service3.mp4",
   },
   {
     id: "04",
-    title: "UX & INTERFACE DESIGN",
-    short: "UX & Interface Design",
-    image: "/images/service_brand_identity.png",
-    tag: "UI // UX DESIGN",
+    num: "/04",
+    category: "UI // UX DESIGN",
+    titleLines: ["PRODUCT & UX", "DESIGN SYSTEMS"],
     description:
-      "High-precision design systems, editorial UI/UX architecture, user research, and rapid prototyping for complex enterprise software products.",
-    points: [
-      "Design systems & component libraries",
-      "User research & usability testing",
-      "Editorial UI architecture",
-      "Rapid interactive prototyping",
+      "Research-led digital product design focused on usability, clarity, business goals and scalable design systems.",
+    capabilities: [
+      "Product strategy",
+      "UX research",
+      "Interface design",
+      "Design systems",
     ],
+    image: "/images/service_brand_identity.png",
+    video: "/images/service4.mp4",
   },
 ];
 
-export function ServicesSection() {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+// ─────────────────────────────────────────────────────────────────────────────
+// Motion Variants
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const activeService = openIndex !== null ? services[openIndex] : null;
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1,
+    },
+  },
+  exit: {
+    opacity: 0,
+    transition: { duration: 0.3, ease: EASE_CUSTOM },
+  },
+};
+
+const numberVariants = {
+  hidden: { opacity: 0, y: -8 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, ease: EASE_CUSTOM },
+  },
+};
+
+const maskVariants = {
+  hidden: { y: "110%", opacity: 0 },
+  visible: {
+    y: "0%",
+    opacity: 1,
+    transition: { duration: 0.65, ease: EASE_CUSTOM },
+  },
+};
+
+const descVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: EASE_CUSTOM, delay: 0.05 },
+  },
+};
+
+const capabilityItemVariants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.5, ease: EASE_CUSTOM },
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ServicesSection Component
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function ServicesSection() {
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [activeIdx, setActiveIdx] = useState<number>(0);
+
+  const currentService = hoveredIdx !== null ? servicesData[hoveredIdx] : servicesData[activeIdx];
 
   return (
     <section
       data-theme="dark"
-      className="relative z-20 w-full bg-[#101010] text-[#f3f3f0] h-[100svh] min-h-[100svh] py-10 md:py-14 flex flex-col justify-center overflow-hidden snap-section"
+      className="relative z-20 w-full bg-black text-[#f3f3f0] h-[100svh] min-h-[100svh] py-10 md:py-14 flex flex-col justify-center overflow-hidden snap-section border-t border-white/[0.08] select-none"
     >
-      {/* Background / Texture / GridLines */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('/noise.png')]" />
+      {/* Background Architectural GridLines & Texture */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('/images/Noise.png')]" />
       <GridLines />
 
       <div className="w-full max-w-[1920px] mx-auto px-6 md:px-0 relative z-10">
-        {/* Upper Header Row matching Grid Columns */}
-        <div className="relative w-full flex flex-col md:flex-row items-start mb-8 md:mb-10">
+        {/* ── Upper Section Header Row (Matching 10.8% / 30.3% / 69.3% Grid) ── */}
+        <div className="relative w-full flex flex-col md:flex-row items-start mb-12 md:mb-16">
           {/* Far Left Section Marker: 10.8% to 30.3% */}
-          <div className="w-full md:w-[19.5%] md:ml-[10.8%] px-6 md:px-0 pt-1 mb-6 md:mb-0">
+          <div className="w-full md:w-[19.5%] md:ml-[10.8%] px-6 md:px-0 pt-1 mb-4 md:mb-0">
             <SectionEyebrow number="03" label="SERVICES" dark className="!mb-0" />
           </div>
 
           {/* Heading Block: 30.3% to 69.3% */}
-          <div className="w-full md:w-[39.0%] px-6 md:px-0 pt-0.5 mb-6 md:mb-0">
-            <h2 className="font-sans text-[clamp(2.3rem,3.2vw,4.1rem)] font-normal tracking-[-0.04em] leading-[0.94] text-left">
-              <span className="block text-[#a4a4a2]">AI-POWERED</span>
-              <span className="block text-[#a4a4a2]">ENGINEERING</span>
-              <span className="block text-white font-medium">SOLUTIONS.</span>
+          <div className="w-full md:w-[39.0%] px-6 md:px-0 pt-0.5 mb-4 md:mb-0">
+            <h2 className="font-sans text-[clamp(2.1rem,3.0vw,3.8rem)] font-normal tracking-[-0.04em] leading-[0.94] text-left">
+              <span className="block text-[#6b6b6b]">ENGINEERING</span>
+              <span className="block text-white font-medium">WHAT MATTERS.</span>
             </h2>
-
-            <p className="font-mono text-[10px] md:text-[11px] leading-relaxed text-[#a4a4a2] mt-4 md:mt-5 uppercase tracking-wide max-w-[280px]">
-              END-TO-END ENGINEERING FOR<br />
-              ENTERPRISE TEAMS - FROM<br />
-              STRATEGY TO PRODUCTION.
-            </p>
           </div>
 
           {/* Right Supporting Copy: 69.3% to 88.8% */}
-          <div className="relative w-full md:w-[19.5%] px-6 md:px-0 pt-1 flex flex-col justify-start">
-            <div className="flex flex-col gap-4 relative z-10">
-              <p className="font-mono text-[10px] md:text-[11px] text-[#FF5C00] tracking-widest uppercase">
-                ARMIA SYSTEMS
-              </p>
-              <p className="font-sans text-[14px] md:text-[16px] leading-tight text-[#a4a4a2] uppercase max-w-xs">
-                PLAN YOUR<br />
-                NEXT ENGINEERING<br />
-                WITH ARMIA.
-              </p>
-            </div>
+          <div className="w-full md:w-[19.5%] px-6 md:px-0 pt-1 flex justify-start">
+            <p className="font-mono text-[12px] md:text-[14px] leading-[1.45] text-[#9a9a96] uppercase tracking-wider max-w-[280px]">
+              END-TO-END DIGITAL ENGINEERING — FROM PRODUCT STRATEGY TO PRODUCTION.
+            </p>
           </div>
         </div>
 
-        {/* Lower Row: Left Image Aligned with Accordion (10.8% to 30.3% -> width: 19.5%) + Accordion (30.3% to 88.8% -> width: 58.5%) */}
-        <div className="relative w-full flex flex-col md:flex-row items-stretch">
-          {/* Left Column Image aligned with Accordion - Only rendered when an accordion item is open */}
-          <div className="hidden md:flex w-[19.5%] ml-[10.8%] pr-8 flex-col justify-start min-h-[220px]">
-            <AnimatePresence mode="wait">
-              {activeService && (
+        {/* ── Main Showcase Row (10.8% to 88.8% -> width: 78.0%) ── */}
+        <div className="w-full md:w-[78.0%] md:ml-[10.8%] px-6 md:px-0">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-stretch">
+            
+            {/* Left Column: Interactive Service Detail & Capabilities (~40% -> 5 cols) */}
+            <div className="md:col-span-5 flex flex-col justify-between">
+              <AnimatePresence mode="wait">
                 <motion.div
-                  key={activeService.id}
-                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -12, scale: 0.98 }}
-                  transition={{ duration: 0.35, ease: EASE_CUSTOM }}
-                  className="relative w-full aspect-[4/3] rounded-sm overflow-hidden border border-white/20 bg-[#181818] shadow-2xl group"
+                  key={currentService.id}
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="w-full flex flex-col justify-between h-full"
                 >
-                  <Image
-                    src={activeService.image}
-                    alt={activeService.title}
-                    fill
-                    sizes="(max-width: 1920px) 25vw, 380px"
-                    className="object-cover object-center brightness-100 contrast-105 group-hover:scale-105 transition-transform duration-700 ease-out"
-                    priority
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#101010]/80 via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
-                    <span className="font-mono text-[9px] tracking-widest uppercase text-white font-medium bg-black/80 px-2.5 py-1 backdrop-blur-md border border-white/20">
-                      {activeService.tag}
-                    </span>
-                    <span className="h-2 w-2 bg-[#FF5C00] shadow-[0_0_8px_#FF5C00]" aria-hidden />
+                  <div>
+                    {/* Service Number & Category */}
+                    <motion.div variants={numberVariants} className="flex items-center justify-between mb-2">
+                      <span className="font-mono text-sm md:text-base font-semibold text-[#FF5A00] tracking-widest">
+                        {currentService.num}
+                      </span>
+                      <span className="font-mono text-[11px] md:text-[13px] tracking-widest uppercase text-[#888888]">
+                        {currentService.category}
+                      </span>
+                    </motion.div>
+
+                    {/* Large Typography Heading with Mask Reveal */}
+                    <div className="overflow-hidden pb-1 mb-3">
+                      <motion.h3
+                        variants={maskVariants}
+                        className="font-sans text-[clamp(1.8rem,2.8vw,3.6rem)] font-bold tracking-[-0.04em] leading-[0.96] text-white uppercase"
+                      >
+                        {currentService.titleLines.map((line, idx) => (
+                          <span key={idx} className="block">
+                            {line}
+                          </span>
+                        ))}
+                      </motion.h3>
+                    </div>
+
+                    {/* Description Paragraph */}
+                    <motion.p
+                      variants={descVariants}
+                      className="font-sans text-[15px] md:text-[16px] leading-[1.6] text-[#b0b0a8] max-w-[460px] mb-4 md:mb-5"
+                    >
+                      {currentService.description}
+                    </motion.p>
+
+                    {/* Editorial Capabilities Checklist */}
+                    <ul className="space-y-2 mb-6">
+                      {currentService.capabilities.map((cap, i) => (
+                        <motion.li
+                          key={i}
+                          variants={capabilityItemVariants}
+                          className="font-mono text-[13px] md:text-[14px] uppercase tracking-wider text-[#d0d0cc] flex items-center"
+                        >
+                          <span className="text-[#FF5A00] font-mono mr-3 text-sm font-bold select-none">
+                            +
+                          </span>
+                          <span>{cap}</span>
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Bottom Link */}
+                  <div className="pt-2">
+                    <a
+                      href="#contact"
+                      className="font-mono text-[11px] md:text-[13px] text-[#FF5A00] hover:text-white tracking-widest uppercase transition-colors inline-flex items-center gap-2 group"
+                    >
+                      <span>TALK TO A SOLUTIONS ARCHITECT</span>
+                      <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+                    </a>
                   </div>
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+              </AnimatePresence>
+            </div>
 
-          {/* Accordion List */}
-          <div className="w-full md:w-[58.5%] px-6 md:px-0">
-            <div className="border-t border-white/[0.06] flex flex-col">
-            {services.map((service, index) => {
-              const isOpen = openIndex === index;
-              return (
-                <div key={service.id} className="border-b border-white/[0.06] bg-[#161616]">
-                  <button
-                    onClick={() => setOpenIndex(isOpen ? null : index)}
-                    className="w-full py-3.5 md:py-4 px-6 md:px-10 flex items-center justify-between text-left group"
+            {/* Right Column: 4-Tile Video Mosaic (~60% -> 7 cols) */}
+            <div className="md:col-span-7 grid grid-cols-12 gap-3 md:gap-3.5 h-full min-h-[340px] md:min-h-[400px]">
+              {servicesData.map((item, idx) => {
+                const isCurrent = (hoveredIdx !== null ? hoveredIdx : activeIdx) === idx;
+
+                // Asymmetric editorial sizing matching reference:
+                // Tile 01: 7 cols (~58%), Tile 02: 5 cols (~42%)
+                // Tile 03: 5 cols (~42%), Tile 04: 7 cols (~58%)
+                const colSpanClass =
+                  idx === 0
+                    ? "col-span-12 md:col-span-7 h-[170px] md:h-[195px]"
+                    : idx === 1
+                    ? "col-span-12 md:col-span-5 h-[170px] md:h-[195px]"
+                    : idx === 2
+                    ? "col-span-12 md:col-span-5 h-[170px] md:h-[195px]"
+                    : "col-span-12 md:col-span-7 h-[170px] md:h-[195px]";
+
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => setActiveIdx(idx)}
+                    onMouseEnter={() => setHoveredIdx(idx)}
+                    onMouseLeave={() => setHoveredIdx(null)}
+                    className={`${colSpanClass} relative overflow-hidden cursor-pointer bg-black border transition-all duration-300 ${
+                      isCurrent
+                        ? "border-[#FF5A00] shadow-[0_0_20px_rgba(255,90,0,0.18)]"
+                        : "border-white/[0.08] hover:border-white/30"
+                    }`}
                   >
-                    <div className="flex items-center gap-6 md:gap-8">
-                      <span className="font-mono text-[12px] md:text-[13px] text-[#666] transition-colors group-hover:text-[#FF5C00]">
-                        {service.id}
-                      </span>
-                      <h3 className="font-sans text-[16px] md:text-[18px] font-medium tracking-tight uppercase transition-colors group-hover:text-white">
-                        <span className={isOpen ? "text-white" : "text-[#a4a4a2]"}>
-                          {service.title}
-                        </span>
-                      </h3>
-                    </div>
-                    <div className="relative w-5 h-5 flex items-center justify-center">
-                      <span className="absolute w-3.5 h-[1px] bg-white transition-transform duration-300" />
-                      <span className={`absolute w-3.5 h-[1px] bg-white transition-transform duration-300 ${isOpen ? "rotate-0" : "rotate-90"}`} />
-                    </div>
-                  </button>
+                    {/* Ambient Looping Video - No zoom on hover */}
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      poster={item.image}
+                      className="w-full h-full object-cover object-center pointer-events-none"
+                    >
+                      <source src={item.video} type="video/mp4" />
+                      <Image
+                        src={item.image}
+                        alt={item.titleLines.join(" ")}
+                        fill
+                        sizes="40vw"
+                        className="object-cover"
+                      />
+                    </video>
 
-                  <AnimatePresence>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.35, ease: EASE_CUSTOM }}
-                        className="overflow-hidden"
-                      >
-                        <div className="pb-6 pt-0 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 px-6 md:px-10 md:pl-[5.5rem] max-h-[140px] md:max-h-[170px] overflow-y-auto">
-                          <p className="font-mono text-[11px] md:text-[12px] leading-relaxed text-[#a4a4a2] max-w-md">
-                            {service.description}
-                          </p>
-                          <ul className="space-y-2.5">
-                            {service.points.map((point) => (
-                              <li
-                                key={point}
-                                className="flex items-start gap-3 font-sans text-[13px] md:text-[14px] text-[#c8c8c4]"
-                              >
-                                <span className="text-[#FF5C00] font-mono mt-0.5" aria-hidden>
-                                  +
-                                </span>
-                                <span>{point}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
+                    {/* Subtle Overlay */}
+                    <div
+                      className={`absolute inset-0 transition-opacity duration-300 pointer-events-none ${
+                        isCurrent
+                          ? "bg-black/10"
+                          : "bg-black/35 hover:bg-black/15"
+                      }`}
+                    />
+
+                    {/* Corner Tag */}
+                    <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
+                      <span className={`font-mono text-[10px] md:text-[11px] px-1.5 py-0.5 font-bold transition-colors ${
+                        isCurrent ? "bg-[#FF5A00] text-white" : "bg-black/75 text-white/75"
+                      }`}>
+                        {item.num}
+                      </span>
+                    </div>
+
+                    {/* Title on Hover / Active */}
+                    <div className="absolute bottom-2.5 left-2.5 right-2.5 z-10 flex items-center justify-between pointer-events-none">
+                      <span className="font-mono text-[9px] md:text-[10px] tracking-wider uppercase text-white/90 truncate drop-shadow-md">
+                        {item.titleLines.join(" ")}
+                      </span>
+                      <span className={`text-[11px] transition-all duration-300 ${
+                        isCurrent ? "text-[#FF5A00] font-bold" : "text-white/40 group-hover:text-white"
+                      }`}>
+                        ↗
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
           </div>
         </div>
-      </div>
       </div>
     </section>
   );
@@ -2549,7 +2935,7 @@ export function ServicesSection() {
 `tsx
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { EASE_CUSTOM } from "@/lib/motion";
@@ -2558,50 +2944,133 @@ import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 import { useRotator } from "@/hooks/useRotator";
 import { RotatorTabStrip } from "@/components/ui/RotatorTabStrip";
 
-const phases = [
+// ─────────────────────────────────────────────────────────────────────────────
+// Phases Data
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface PhaseItem {
+  id: string;
+  num: string;
+  category: string;
+  titleLines: string[];
+  description: string;
+  deliverables: string[];
+  duration: string;
+}
+
+const phases: PhaseItem[] = [
   {
     id: "01",
-    dots: "▪▪▪▪",
-    category: "DISCOVERY & STRATEGY",
-    title: "Stakeholder interviews, technical audit, requirements analysis",
+    num: "/01",
+    category: "PHASE 01 // STRATEGY",
+    titleLines: ["STAKEHOLDER AUDIT", "& REQUIREMENTS"],
     description:
-      "We align stakeholders, audit the technical landscape, and define requirements so the delivery path is clear before build begins.",
+      "We align key stakeholders, audit existing systems, and establish technical architecture so delivery is risk-aware before coding starts.",
+    deliverables: [
+      "Technical architecture audit & scoping",
+      "Security, SLA & compliance matrix",
+      "Sprint roadmap & milestone plan",
+    ],
+    duration: "WEEKS 01 - 02",
   },
   {
     id: "02",
-    dots: "▪▪▪▪",
-    category: "UX & INTERFACE DESIGN",
-    title: "Research-driven design with iterative prototyping",
+    num: "/02",
+    category: "PHASE 02 // ARCHITECTURE",
+    titleLines: ["RESEARCH-DRIVEN", "DESIGN SYSTEMS"],
     description:
-      "We define the experience through research, wireframes, and iterative prototyping - ensuring the UI is clear, consistent, and aligned to goals.",
+      "We define user journeys and high-fidelity prototypes, validating UX clarity and creating atomic design systems for seamless engineering handoff.",
+    deliverables: [
+      "Interactive Figma tokens & prototypes",
+      "Usability testing & feedback synthesis",
+      "Developer handoff documentation",
+    ],
+    duration: "WEEKS 03 - 04",
   },
   {
     id: "03",
-    dots: "▪▪▪▪",
-    category: "QUALITY ASSURANCE",
-    title: "Security audits, performance testing, compliance",
+    num: "/03",
+    category: "PHASE 03 // ASSURANCE",
+    titleLines: ["SECURITY AUDITS", "& PERFORMANCE"],
     description:
-      "We validate security, performance, and compliance before launch, so the delivery is reliable and risk-aware.",
+      "Automated regression test suites, penetration testing, and load stress audits guarantee 99.99% resilience before going live.",
+    deliverables: [
+      "Automated regression test suites",
+      "SOC2 / HIPAA compliance audits",
+      "Sub-100ms load & stress profiling",
+    ],
+    duration: "WEEKS 05 - 06",
   },
   {
     id: "04",
-    dots: "▪▪▪▪▪",
-    category: "ENGINEERING & DEVELOPMENT",
-    title: "Agile sprints with CI/CD and code reviews",
+    num: "/04",
+    category: "PHASE 04 // EXECUTION",
+    titleLines: ["AGILE SPRINTS", "& CI/CD BUILDS"],
     description:
-      "We build in agile sprints with CI/CD, code reviews, and a focus on maintainable, production-ready systems.",
+      "Two-week agile sprints with continuous integration, automated code review gates, and zero-downtime database deployment pipelines.",
+    deliverables: [
+      "Microservices & cloud backend APIs",
+      "Automated CI/CD build pipelines",
+      "Transparent Jira sprint telemetry",
+    ],
+    duration: "WEEKS 07 - 10",
   },
   {
     id: "05",
-    dots: "▪▪▪▪▪",
-    category: "LAUNCH & SUPPORT",
-    title: "Zero-downtime deployment with 24/7 monitoring",
+    num: "/05",
+    category: "PHASE 05 // SCALE",
+    titleLines: ["ZERO-DOWNTIME", "24/7 MONITORING"],
     description:
-      "We deploy with zero downtime and hand off with monitoring, runbooks, and support so the system stays stable in production.",
+      "Canary rollout with full telemetry dashboards, automated disaster recovery runbooks, and 24/7 SLA engineering support.",
+    deliverables: [
+      "Canary & blue-green deployments",
+      "Real-time telemetry & latency alerts",
+      "24/7 SLA enterprise support",
+    ],
+    duration: "CONTINUOUS",
   },
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Motion Variants
+// ─────────────────────────────────────────────────────────────────────────────
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.08 },
+  },
+  exit: {
+    opacity: 0,
+    transition: { duration: 0.25, ease: EASE_CUSTOM },
+  },
+};
+
+const maskVariants = {
+  hidden: { y: "110%", opacity: 0 },
+  visible: {
+    y: "0%",
+    opacity: 1,
+    transition: { duration: 0.55, ease: EASE_CUSTOM },
+  },
+};
+
+const fadeVariants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, ease: EASE_CUSTOM },
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ProcessSection Component
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function ProcessSection() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const {
     activeIndex,
     setActiveIndex,
@@ -2611,166 +3080,212 @@ export function ProcessSection() {
     intervalMs,
     timerKey,
     isPaused,
-  } = useRotator(phases, { autoAdvance: true, intervalMs: 4500 });
+  } = useRotator(phases, { autoAdvance: true, intervalMs: 5000 });
 
   return (
     <section
+      ref={containerRef}
       data-theme="dark"
-      className="relative w-full bg-[#101010] text-[#f3f3f0] h-[100svh] min-h-[100svh] py-10 md:py-14 flex flex-col justify-center overflow-hidden select-none snap-section border-t border-white/[0.08]"
+      className="relative z-20 w-full bg-black text-[#f3f3f0] h-[100svh] min-h-[100svh] py-10 md:py-14 flex flex-col justify-center overflow-hidden snap-section border-t border-white/[0.08] select-none"
     >
-      {/* Architectural Vertical Grid Lines */}
-      <GridLines animate={true} animationMode="center" />
+      {/* Background GridLines & Texture */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('/images/Noise.png')]" />
+      <GridLines />
 
-      {/* Main Section Content Container */}
-      <div className="relative z-10 mx-auto max-w-[1920px] w-full px-6 md:px-0">
-        {/* Upper Header Row matching Grid Columns */}
-        <div className="relative w-full flex flex-col md:flex-row items-start mb-6 md:mb-10">
-          {/* Far Left Section Marker: 10.8% to 30.3% */}
-          <div className="w-full md:w-[19.5%] md:ml-[10.8%] px-6 md:px-0 pt-1 mb-6 md:mb-0">
+      <div className="w-full max-w-[1920px] mx-auto px-6 md:px-0 relative z-10">
+        
+        {/* ── Upper Section Header Row (10.8% / 30.3% / 69.3% Grid) ── */}
+        <div className="relative w-full flex flex-col md:flex-row items-start mb-6 md:mb-8">
+          {/* Far Left Section Marker */}
+          <div className="w-full md:w-[19.5%] md:ml-[10.8%] px-6 md:px-0 pt-1 mb-4 md:mb-0">
             <SectionEyebrow number="04" label="PROCESS" dark className="!mb-0" />
           </div>
 
-          {/* Heading Block: 30.3% to 69.3% */}
-          <div className="w-full md:w-[39.0%] px-6 md:px-0 pt-0.5 mb-6 md:mb-0">
-            <h2 className="font-sans text-[clamp(2.3rem,3.2vw,4.1rem)] font-normal tracking-[-0.04em] leading-[0.94] text-left">
+          {/* Heading Block */}
+          <div className="w-full md:w-[39.0%] px-6 md:px-0 pt-0.5 mb-4 md:mb-0">
+            <h2 className="font-sans text-[clamp(2.1rem,3.0vw,3.8rem)] font-normal tracking-[-0.04em] leading-[0.94] text-left">
               <span className="block text-[#6b6b6b]">A PROVEN</span>
-              <span className="block text-white">DELIVERY</span>
-              <span className="block text-white">FRAMEWORK.</span>
+              <span className="block text-white font-medium">DELIVERY FRAMEWORK.</span>
             </h2>
           </div>
 
-          {/* Right Supporting Copy: 69.3% to 88.8% */}
+          {/* Right Supporting Copy */}
           <div className="w-full md:w-[19.5%] px-6 md:px-0 pt-1 flex justify-start">
-            <p className="font-mono text-[10px] md:text-[11px] leading-[1.35] text-[#9a9a96] uppercase tracking-wider max-w-[240px]">
-              EVERY ENGAGEMENT FOLLOWS THE SAME RIGOROUS FIVE-PHASE PROCESS -
-              REFINED OVER 25+ YEARS AND 185+ SUCCESSFUL DELIVERIES.
+            <p className="font-mono text-[12px] md:text-[14px] leading-[1.45] text-[#9a9a96] uppercase tracking-wider max-w-[280px]">
+              EVERY ENGAGEMENT FOLLOWS THE SAME RIGOROUS FIVE-PHASE PROCESS - REFINED OVER 20+ YEARS.
             </p>
           </div>
         </div>
 
-        {/* 2-Column Main Content: Rotator Spotlight on Left, Persistent CTA on Right */}
-        <div className="relative w-full flex flex-col md:flex-row items-stretch">
-          {/* Left Column: Tab Strip + Phase Spotlight (30.3% to 69.3% -> width: 39.0%) */}
-          <div
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-            className="w-full md:w-[39.0%] md:ml-[30.3%] flex flex-col justify-between pr-0 md:pr-8"
-          >
-            {/* Tab Strip with active tab progress fill */}
-            <div className="mb-4">
-              <RotatorTabStrip
-                items={phases.map((p) => ({ id: p.id, label: p.id }))}
-                activeIndex={activeIndex}
-                onSelect={setActiveIndex}
-                dark
-                autoAdvance={autoAdvance}
-                intervalMs={intervalMs}
-                timerKey={timerKey}
-                isPaused={isPaused}
-              />
-            </div>
-
-            {/* Rotator Card with AnimatePresence */}
-            <div className="relative flex-1 min-h-[260px] md:min-h-[280px]">
+        {/* ── Main Structured Showcase Panel (10.8% to 88.8% -> width: 78.0%) ── */}
+        <div
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          className="w-full md:w-[78.0%] md:ml-[10.8%] px-6 md:px-0"
+        >
+          {/* Outer Bordered Framework Card */}
+          <div className="border border-white/[0.1] bg-[#0c0c0c] grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-white/[0.08]">
+            
+            {/* ── Left Column: Active Phase Deep Dive (7 cols) ── */}
+            <div className="md:col-span-7 p-6 md:p-8 lg:p-10 flex flex-col justify-between min-h-[380px] md:min-h-[420px]">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={phase.id}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -15 }}
-                  transition={{ duration: 0.4, ease: EASE_CUSTOM }}
-                  className="relative bg-[#121212] p-6 md:p-8 flex flex-col justify-between h-full border-t border-b border-white/[0.06]"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="w-full flex flex-col justify-between h-full"
                 >
-                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-brand-accent z-10" />
+                  <div>
+                    {/* Category & Timeline Badge */}
+                    <motion.div variants={fadeVariants} className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 bg-[#FF5A00] inline-block" />
+                        <span className="font-mono text-[12px] md:text-[13.5px] tracking-widest uppercase text-[#FF5A00] font-semibold">
+                          {phase.category}
+                        </span>
+                      </div>
+                      <span className="font-mono text-[11px] md:text-[13px] tracking-wider text-white/60 bg-white/[0.05] px-2.5 py-0.5 border border-white/[0.08]">
+                        {phase.duration}
+                      </span>
+                    </motion.div>
 
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-sans text-[36px] md:text-[44px] font-normal text-white tracking-tight leading-none">
-                      {phase.id}
-                    </span>
-                    <span className="font-mono text-[11px] text-brand-accent tracking-tighter">
-                      {phase.dots}
-                    </span>
+                    {/* Title with Mask Reveal */}
+                    <div className="overflow-hidden pb-1 mb-3">
+                      <motion.h3
+                        variants={maskVariants}
+                        className="font-sans text-[clamp(1.6rem,2.4vw,2.8rem)] font-bold tracking-[-0.03em] leading-[1.05] text-white uppercase"
+                      >
+                        {phase.titleLines.map((line, idx) => (
+                          <span key={idx} className="block">
+                            {line}
+                          </span>
+                        ))}
+                      </motion.h3>
+                    </div>
+
+                    {/* Description */}
+                    <motion.p
+                      variants={fadeVariants}
+                      className="font-sans text-[15px] md:text-[16px] leading-[1.6] text-[#a4a4a0] max-w-lg mb-6"
+                    >
+                      {phase.description}
+                    </motion.p>
+
+                    {/* Deliverables Checklist */}
+                    <div className="pt-4 border-t border-white/[0.06]">
+                      <div className="font-mono text-[10px] md:text-[11.5px] tracking-widest text-[#777777] uppercase mb-2.5">
+                        PHASE DELIVERABLES
+                      </div>
+                      <ul className="space-y-2">
+                        {phase.deliverables.map((del, i) => (
+                          <motion.li
+                            key={i}
+                            variants={fadeVariants}
+                            className="font-mono text-[13px] md:text-[14px] uppercase tracking-wider text-[#d0d0cc] flex items-center gap-2.5"
+                          >
+                            <span className="text-[#FF5A00] font-bold text-sm">✓</span>
+                            <span>{del}</span>
+                          </motion.li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
 
-                  <div>
-                    <div className="font-mono text-[10px] md:text-[11px] tracking-widest uppercase text-brand-accent flex items-center gap-1.5 mb-2">
-                      <span className="h-1.5 w-1.5 bg-brand-accent inline-block" />
-                      <span>{phase.category}</span>
-                    </div>
-                    <h3 className="font-sans text-[20px] md:text-[24px] font-medium text-white tracking-tight leading-[1.2] mb-3">
-                      {phase.title}
-                    </h3>
-                    <p className="font-sans text-[13px] md:text-[14px] text-[#a4a4a0] leading-[1.5] font-normal max-w-lg">
-                      {phase.description}
-                    </p>
+                  {/* Numbered Controls Strip at bottom of phase */}
+                  <div className="pt-6 mt-6 border-t border-white/[0.06]">
+                    <RotatorTabStrip
+                      items={phases.map((p) => ({ id: p.id, label: p.id }))}
+                      activeIndex={activeIndex}
+                      onSelect={(idx) => {
+                        setIsPaused(true);
+                        setActiveIndex(idx);
+                      }}
+                      dark
+                      autoAdvance={autoAdvance}
+                      intervalMs={intervalMs}
+                      timerKey={timerKey}
+                      isPaused={isPaused}
+                      layoutIdPrefix="process-steps-tab"
+                    />
                   </div>
                 </motion.div>
               </AnimatePresence>
             </div>
-          </div>
 
-          {/* Right Column: Persistent Orange CTA Card (69.3% to 88.8% -> width: 19.5%) */}
-          <div className="w-full md:w-[19.5%] flex flex-col mt-6 md:mt-0">
-            <div className="relative bg-brand-accent p-6 md:p-7 flex flex-col justify-between h-full text-white overflow-hidden">
-              {/* Subtle decorative spiral ribbon accent */}
+            {/* ── Right Column: Engagement Action & Overview Box (5 cols) ── */}
+            <div className="md:col-span-5 p-6 md:p-8 lg:p-10 flex flex-col justify-between bg-[#101010] relative overflow-hidden">
+              {/* Subtle Ribbon Backdrop Graphic */}
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -top-10 -right-10 w-[180px] md:w-[220px] aspect-square opacity-20 filter contrast-125"
+                className="pointer-events-none absolute -top-8 -right-8 w-[200px] aspect-square opacity-15 filter contrast-125 select-none"
               >
                 <Image
                   src="/images/spiral-ribbon.png"
                   alt=""
                   fill
-                  sizes="220px"
+                  sizes="200px"
                   className="object-contain"
                 />
               </div>
 
               <div className="relative z-10">
-                <h3 className="font-sans font-bold text-[22px] md:text-[26px] leading-[1.05] tracking-tight uppercase mb-3">
-                  READY
-                  <br />
-                  TO START?
-                </h3>
+                <div className="font-mono text-[10px] md:text-[11.5px] tracking-widest text-[#FF5A00] uppercase mb-2">
+                  // ENGAGEMENT MODEL
+                </div>
 
-                <p className="font-sans text-[11px] md:text-[12px] text-white/90 leading-[1.35] mb-4">
-                  Tell me about your project, your goals, and where you want the
-                  website to go.
+                <h4 className="font-sans font-bold text-[clamp(1.3rem,1.8vw,1.9rem)] leading-[1.1] tracking-tight uppercase text-white mb-3">
+                  HOW WE WORK
+                  <br />
+                  WITH YOUR TEAM.
+                </h4>
+
+                <p className="font-sans text-[15px] md:text-[16px] text-[#8e8e88] leading-[1.6] mb-5">
+                  Direct Slack access to technical leads, weekly demo releases, and zero contract lock-in.
                 </p>
 
-                {/* Subdued Checklist */}
-                <div className="space-y-1.5 mb-4 pt-2.5 border-t border-white/20">
-                  <div className="font-mono text-[8px] md:text-[9px] tracking-widest text-white/70 uppercase mb-1.5">
-                    WHAT YOU GET
+                {/* Structured Highlights */}
+                <div className="space-y-3 pt-4 border-t border-white/[0.08]">
+                  <div className="flex items-start gap-3">
+                    <span className="font-mono text-sm text-[#FF5A00] font-bold">01</span>
+                    <div>
+                      <div className="font-mono text-[13px] md:text-[14px] text-white font-medium uppercase">Dedicated Pod</div>
+                      <div className="text-[12px] md:text-[13px] text-[#888888]">Dedicated engineers &amp; sprint leads</div>
+                    </div>
                   </div>
-                  <div className="font-sans text-[11px] md:text-[12px] text-white flex items-center gap-1.5">
-                    <span className="text-white/80">✓</span>
-                    <span>Free intro call</span>
+                  <div className="flex items-start gap-3">
+                    <span className="font-mono text-sm text-[#FF5A00] font-bold">02</span>
+                    <div>
+                      <div className="font-mono text-[13px] md:text-[14px] text-white font-medium uppercase">Sprint Cadence</div>
+                      <div className="text-[12px] md:text-[13px] text-[#888888]">2-week sprints with transparent Jira boards</div>
+                    </div>
                   </div>
-                  <div className="font-sans text-[11px] md:text-[12px] text-white flex items-center gap-1.5">
-                    <span className="text-white/80">✓</span>
-                    <span>Project fit check</span>
-                  </div>
-                  <div className="font-sans text-[11px] md:text-[12px] text-white flex items-center gap-1.5">
-                    <span className="text-white/80">✓</span>
-                    <span>Clear next steps</span>
+                  <div className="flex items-start gap-3">
+                    <span className="font-mono text-sm text-[#FF5A00] font-bold">03</span>
+                    <div>
+                      <div className="font-mono text-[13px] md:text-[14px] text-white font-medium uppercase">Production Guarantee</div>
+                      <div className="text-[12px] md:text-[13px] text-[#888888]">Automated testing &amp; 99.99% SLA uptime</div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Compact CTA Button */}
-              <a
-                href="#contact"
-                className="relative z-10 group bg-[#111111] text-white font-mono text-[9px] md:text-[10px] tracking-widest uppercase px-4 py-3 flex items-center justify-between hover:bg-black transition-colors w-full mt-2"
-              >
-                <span>BOOK A CALL</span>
-                <div className="w-5 h-5 bg-white text-black flex items-center justify-center text-xs transition-transform duration-300 group-hover:translate-x-0.5">
-                  →
-                </div>
-              </a>
+              {/* Action Button */}
+              <div className="relative z-10 pt-6 mt-6 border-t border-white/[0.08]">
+                <a
+                  href="#contact"
+                  className="group bg-[#FF5A00] hover:bg-[#ff4500] text-white font-mono text-[11px] md:text-[13px] tracking-widest uppercase px-5 py-3.5 flex items-center justify-between transition-colors w-full"
+                >
+                  <span className="font-semibold">SCHEDULE A TECHNICAL AUDIT</span>
+                  <span className="text-base transition-transform duration-300 group-hover:translate-x-1">→</span>
+                </a>
+              </div>
             </div>
+
           </div>
         </div>
+
       </div>
     </section>
   );
@@ -2785,18 +3300,30 @@ export function ProcessSection() {
 `tsx
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { EASE_CUSTOM } from "@/lib/motion";
 import { GridLines } from "@/components/ui/GridLines";
+import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 import { useRotator } from "@/hooks/useRotator";
 import { RotatorTabStrip } from "@/components/ui/RotatorTabStrip";
+
 // ─────────────────────────────────────────────────────────────────────────────
-// Data
+// Portfolio Data (5 Case Studies)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const servicesData = [
+interface CaseStudyItem {
+  id: string;
+  num: string;
+  category: string;
+  title: string;
+  image: string;
+  caption: string;
+  capabilities: string[];
+}
+
+const servicesData: CaseStudyItem[] = [
   {
     id: "01",
     num: "/01",
@@ -2879,8 +3406,6 @@ const servicesData = [
   },
 ];
 
-// Removed useWindowWidth and useReducedMotion as they were only used for the wheel interceptor.
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Content entrance variants
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2889,16 +3414,16 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.065, delayChildren: 0.08 },
+    transition: { staggerChildren: 0.065, delayChildren: 0.05 },
   },
 };
 
 const fadeUpVariants = {
-  hidden: { opacity: 0, y: 14 },
+  hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.58, ease: EASE_CUSTOM },
+    transition: { duration: 0.5, ease: EASE_CUSTOM },
   },
 };
 
@@ -2907,24 +3432,22 @@ const maskVariants = {
   visible: {
     y: "0%",
     opacity: 1,
-    transition: { duration: 0.78, ease: EASE_CUSTOM },
+    transition: { duration: 0.65, ease: EASE_CUSTOM },
   },
 };
 
 const imageVariants = {
-  hidden: { scale: 1.03, opacity: 0 },
+  hidden: { scale: 1.04, opacity: 0 },
   visible: {
     scale: 1,
     opacity: 1,
-    transition: { duration: 0.8, ease: EASE_CUSTOM },
+    transition: { duration: 0.6, ease: EASE_CUSTOM },
   },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PortfolioServicesSection
+// PortfolioServicesSection Component
 // ─────────────────────────────────────────────────────────────────────────────
-
-import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 
 export function PortfolioServicesSection() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -2939,158 +3462,163 @@ export function PortfolioServicesSection() {
     isPaused,
   } = useRotator(servicesData, { autoAdvance: true, intervalMs: 4500 });
 
-  const renderContent = (service: typeof servicesData[0]) => (
-    <div className="relative z-10 w-full">
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-        className="w-full flex flex-col justify-between"
-      >
-        {/* Top Category & Number Header Row */}
-        <div className="w-full flex items-center justify-between mb-3 md:mb-5">
-          <motion.div variants={fadeUpVariants} className="flex items-center gap-2">
-            <span className="h-[1px] w-[18px] bg-[#ff5a00] inline-block" />
-            <span className="font-mono text-[10px] md:text-[11px] tracking-widest text-[#5a6270] uppercase">
-              {service.category}
-            </span>
-          </motion.div>
-          <motion.span
-            variants={fadeUpVariants}
-            className="font-mono text-[16px] md:text-[20px] text-[#737b88]"
-          >
-            {service.num}
-          </motion.span>
-        </div>
-
-        {/* Main 2-Column Split Layout */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-stretch">
-          {/* Left Column: Image + Caption (Flex column filling height) */}
-          <div className="md:col-span-5 flex flex-col justify-between h-full">
-            <div className="flex-1 flex flex-col">
-              <motion.div
-                variants={imageVariants}
-                className="relative overflow-hidden w-full h-[220px] md:h-[250px] lg:h-[270px] bg-neutral-100 shadow-sm group"
-              >
-                <Image
-                  src={service.image}
-                  alt={service.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 420px"
-                  className="object-contain md:object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
-                />
-              </motion.div>
-
-              <motion.p
-                variants={fadeUpVariants}
-                className="font-sans text-[11.5px] md:text-[12px] text-[#7c8491] max-w-[360px] mt-2.5 leading-[1.4]"
-              >
-                {service.caption}
-              </motion.p>
-            </div>
-          </div>
-
-          {/* Right Column: Title + Capability List Aligned */}
-          <div className="md:col-span-7 flex flex-col justify-start">
-            {/* Title placed directly on top of the bullet points */}
-            <div className="overflow-hidden pb-3 mb-3 border-b border-black/[0.06]">
-              <motion.h3
-                variants={maskVariants}
-                className="font-sans text-[clamp(2.0rem,2.8vw,3.6rem)] leading-[1.05] tracking-[-0.035em] font-medium text-[#111111]"
-              >
-                {service.title}
-              </motion.h3>
-            </div>
-
-            <ul className="space-y-2.5 pt-1">
-              {service.capabilities.map((capability, i) => (
-                <motion.li
-                  key={i}
-                  variants={fadeUpVariants}
-                  className="font-sans text-[14.5px] md:text-[16px] leading-[1.65] text-[#555d6b] flex items-start"
-                >
-                  <span className="text-[#ff5a00] font-mono mr-3 text-sm select-none">
-                    +
-                  </span>
-                  <span>{capability}</span>
-                </motion.li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  );
-
   return (
     <section
       ref={containerRef}
-      className="relative z-20 w-full bg-white text-[#111111] h-[100svh] min-h-[100svh] py-10 md:py-14 flex flex-col justify-center overflow-hidden snap-section select-none"
+      className="relative z-20 w-full bg-white text-[#111111] h-[100svh] min-h-[100svh] py-8 md:py-12 flex flex-col justify-center overflow-hidden snap-section select-none border-t border-black/[0.08]"
     >
+      <GridLines light />
+
       <div className="w-full max-w-[1920px] mx-auto px-6 md:px-0 relative z-10">
-        {/* Upper Header Row matching ServicesSection Grid Columns */}
+        
+        {/* ── Upper Header Row matching 10.8% / 30.3% / 69.3% Grid ── */}
         <div className="relative w-full flex flex-col md:flex-row items-start mb-6 md:mb-8">
           {/* Far Left Section Marker: 10.8% to 30.3% */}
-          <div className="w-full md:w-[19.5%] md:ml-[10.8%] px-6 md:px-0 pt-1 mb-6 md:mb-0">
+          <div className="w-full md:w-[19.5%] md:ml-[10.8%] px-6 md:px-0 pt-1 mb-4 md:mb-0">
             <SectionEyebrow number="05" label="PORTFOLIO" className="!mb-0" />
           </div>
 
           {/* Heading Block: 30.3% to 69.3% */}
-          <div className="w-full md:w-[39.0%] px-6 md:px-0 pt-0.5 mb-6 md:mb-0">
-            <h2 className="font-sans text-[clamp(2.3rem,3.2vw,4.1rem)] font-normal tracking-[-0.04em] leading-[0.94] text-left">
+          <div className="w-full md:w-[39.0%] px-6 md:px-0 pt-0.5 mb-4 md:mb-0">
+            <h2 className="font-sans text-[clamp(2.1rem,3.0vw,3.8rem)] font-normal tracking-[-0.04em] leading-[0.94] text-left">
               <span className="block text-[#111111]">CASE</span>
               <span className="block text-[#6b6b6b] font-medium">STUDIES.</span>
             </h2>
-
-            <p className="font-mono text-[10px] md:text-[11px] leading-relaxed text-[#6b6b6b] mt-4 md:mt-5 uppercase tracking-wide max-w-[280px]">
-              REAL OUTCOMES FROM REAL ENGAGEMENTS — BUILT FOR ENTERPRISE SCALE.
-            </p>
           </div>
 
-          {/* Right Supporting Copy: 69.3% to 88.8% */}
+          {/* Right Supporting Copy / Link: 69.3% to 88.8% */}
           <div className="w-full md:w-[19.5%] px-6 md:px-0 pt-1 flex justify-start">
-            <div className="flex flex-col gap-4">
-              <a
-                href="#portfolio"
-                className="font-mono text-[10px] md:text-[11px] text-[#ff5a00] tracking-widest uppercase hover:text-[#111111] transition-colors"
-              >
-                ALL WORK →
-              </a>
-            </div>
+            <a
+              href="#contact"
+              className="font-mono text-[12px] md:text-[14px] text-[#ff5a00] tracking-widest uppercase hover:text-[#111111] transition-colors"
+            >
+              ALL WORK →
+            </a>
           </div>
         </div>
 
-        {/* Tab Strip + Slider Container (30.3% to 88.8% width: 58.5%) */}
+        {/* ── Main Showcase Grid (10.8% to 88.8% -> width: 78.0%) ── */}
         <div
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
-          className="w-full md:w-[58.5%] md:ml-[30.3%] px-6 md:px-0"
+          className="w-full md:w-[78.0%] md:ml-[10.8%] px-6 md:px-0"
         >
-          <div className="mb-4">
-            <RotatorTabStrip
-              items={servicesData.map((s) => ({ id: s.id, label: s.num }))}
-              activeIndex={activeIndex}
-              onSelect={setActiveIndex}
-              autoAdvance={autoAdvance}
-              intervalMs={intervalMs}
-              timerKey={timerKey}
-              isPaused={isPaused}
-            />
-          </div>
+          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 lg:gap-14 items-center">
+            
+            {/* ── Left Column: Large Hero Case Study Image Showcase (7 cols) ── */}
+            <div className="md:col-span-7 flex flex-col justify-between">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={service.id}
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit={{ opacity: 0, transition: { duration: 0.2 } }}
+                  className="w-full flex flex-col"
+                >
+                  {/* Category Eyebrow & Number */}
+                  <motion.div variants={fadeUpVariants} className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="h-[2px] w-[18px] bg-[#ff5a00] inline-block" />
+                      <span className="font-mono text-[12px] md:text-[13.5px] tracking-widest text-[#5a6270] uppercase font-semibold">
+                        {service.category}
+                      </span>
+                    </div>
+                    <span className="font-mono text-sm md:text-base font-semibold text-[#ff5a00]">
+                      {service.num}
+                    </span>
+                  </motion.div>
 
-          <div className="relative min-h-[300px] md:min-h-[340px]">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeIndex}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.4, ease: EASE_CUSTOM }}
-                className="w-full"
-              >
-                {renderContent(servicesData[activeIndex])}
-              </motion.div>
-            </AnimatePresence>
+                  {/* Large High-Impact Case Study Device / Product Image */}
+                  <motion.div
+                    variants={imageVariants}
+                    className="relative overflow-hidden w-full aspect-[16/10] bg-neutral-100 border border-black/[0.08] shadow-md group"
+                  >
+                    <Image
+                      src={service.image}
+                      alt={service.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 750px"
+                      className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.02]"
+                      priority
+                    />
+                  </motion.div>
+
+                  {/* Caption under large image */}
+                  <motion.p
+                    variants={fadeUpVariants}
+                    className="font-sans text-[15px] md:text-[16px] text-[#606775] mt-3 leading-[1.6]"
+                  >
+                    {service.caption}
+                  </motion.p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* ── Right Column: Project Title, Impact Capabilities & Navigation (5 cols) ── */}
+            <div className="md:col-span-5 flex flex-col justify-between h-full">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={service.id}
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit={{ opacity: 0, transition: { duration: 0.2 } }}
+                  className="w-full flex flex-col justify-between"
+                >
+                  <div>
+                    {/* Project Title */}
+                    <div className="overflow-hidden pb-2 mb-4 border-b border-black/[0.08]">
+                      <motion.h3
+                        variants={maskVariants}
+                        className="font-sans text-[clamp(2.2rem,3.2vw,4.0rem)] leading-[1.0] tracking-[-0.04em] font-medium text-[#111111]"
+                      >
+                        {service.title}
+                      </motion.h3>
+                    </div>
+
+                    {/* Capabilities List */}
+                    <div className="mb-6 md:mb-8">
+                      <div className="font-mono text-[10px] md:text-[11.5px] tracking-widest text-[#777777] uppercase mb-3">
+                        ENGINEERING HIGHLIGHTS
+                      </div>
+                      <ul className="space-y-2.5">
+                        {service.capabilities.map((capability, i) => (
+                          <motion.li
+                            key={i}
+                            variants={fadeUpVariants}
+                            className="font-sans text-[14px] md:text-[15.5px] leading-[1.55] text-[#444b58] flex items-start"
+                          >
+                            <span className="text-[#ff5a00] font-mono mr-3 text-sm font-bold select-none">
+                              +
+                            </span>
+                            <span>{capability}</span>
+                          </motion.li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* 01 / 02 / 03 / 04 / 05 Rotator Numbered Controls Strip */}
+                  <div className="pt-2">
+                    <RotatorTabStrip
+                      items={servicesData.map((s) => ({ id: s.id, label: s.num }))}
+                      activeIndex={activeIndex}
+                      onSelect={(idx) => {
+                        setIsPaused(true);
+                        setActiveIndex(idx);
+                      }}
+                      autoAdvance={autoAdvance}
+                      intervalMs={intervalMs}
+                      timerKey={timerKey}
+                      isPaused={isPaused}
+                      layoutIdPrefix="portfolio-case-tab"
+                    />
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
           </div>
         </div>
       </div>
@@ -3325,7 +3853,7 @@ const AWARDS_LIST = [
 
 export function AwardsSection() {
   return (
-    <section className="relative z-20 w-full bg-white text-[#111111] py-14 md:py-18 border-t border-black/[0.08] select-none snap-section flex flex-col justify-center overflow-hidden">
+    <section className="relative z-20 w-full bg-white text-[#111111] py-10 md:py-14 border-t border-black/[0.08] select-none snap-section flex flex-col justify-center overflow-hidden h-[100svh] min-h-[100svh]">
       <div className="w-full max-w-[1920px] mx-auto px-6 md:px-0 relative z-10">
         {/* Upper Header Row matching Grid Columns */}
         <div className="relative w-full flex flex-col md:flex-row items-start mb-8 md:mb-10">
@@ -3347,20 +3875,19 @@ export function AwardsSection() {
               <span className="block text-[#6b6b6b] font-medium">RECOGNITION.</span>
             </motion.h2>
 
-            <p className="font-mono text-[10px] md:text-[11px] leading-relaxed text-[#6b6b6b] mt-3 md:mt-4 uppercase tracking-wide max-w-[280px]">
-              INDUSTRY HONORS &amp; VERIFIED <br />
-              <strong className="text-[#111111] font-semibold">ENGINEERING EXCELLENCE</strong>.
+            <p className="font-mono text-[12px] md:text-[14px] leading-relaxed text-[#6b6b6b] mt-3 md:mt-4 uppercase tracking-wide max-w-[300px]">
+              RECOGNIZED GLOBALLY BY LEADING RESEARCH AND ANALYST PLATFORMS.
             </p>
           </div>
 
-          {/* Right Supporting Meta: 69.3% to 88.8% */}
+          {/* Right Supporting Copy: 69.3% to 88.8% */}
           <div className="w-full md:w-[19.5%] px-6 md:px-0 pt-1 flex justify-start">
             <div className="flex flex-col gap-2">
-              <p className="font-mono text-[10px] md:text-[11px] text-[#ff5a00] tracking-widest uppercase font-semibold">
+              <p className="font-mono text-[12px] md:text-[13.5px] text-[#ff5a00] tracking-widest uppercase font-semibold">
                 20+ YEARS OF EXCELLENCE
               </p>
-              <p className="font-sans text-[13px] md:text-[14px] leading-tight text-[#666666] uppercase max-w-xs">
-                RECOGNIZED GLOBALLY BY LEADING RESEARCH AND ANALYST PLATFORMS.
+              <p className="font-sans text-[15px] md:text-[16px] leading-relaxed text-[#555555] uppercase max-w-xs">
+                GLOBAL RECOGNITION FOR ENGINEERING EXCELLENCE, PRODUCT DESIGN &amp; INNOVATION.
               </p>
             </div>
           </div>
@@ -3437,15 +3964,20 @@ export function FAQSection() {
   };
 
   return (
-    <section className="relative z-20 w-full bg-white text-[#111111] py-10 md:py-14 border-t border-black/[0.08] flex flex-col justify-center overflow-hidden snap-section h-[100svh] min-h-[100svh] select-none">
-      <GridLines light />
+    <section
+      data-theme="dark"
+      className="relative z-20 w-full bg-black text-[#f3f3f0] py-10 md:py-14 flex flex-col justify-center overflow-hidden snap-section h-[100svh] min-h-[100svh] select-none"
+    >
+      {/* Background Texture */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('/images/Noise.png')]" />
+      <GridLines />
 
       <div className="w-full max-w-[1920px] mx-auto px-6 md:px-0 relative z-10">
         {/* Upper Header Row matching ServicesSection Grid Columns */}
         <div className="relative w-full flex flex-col md:flex-row items-start mb-8 md:mb-10">
           {/* Far Left Section Marker: 10.8% to 30.3% */}
           <div className="w-full md:w-[19.5%] md:ml-[10.8%] px-6 md:px-0 pt-1 mb-6 md:mb-0">
-            <SectionEyebrow number="08" label="FAQ" className="!mb-0" />
+            <SectionEyebrow number="08" label="FAQ" dark className="!mb-0" />
           </div>
 
           {/* Heading Block: 30.3% to 69.3% */}
@@ -3455,15 +3987,15 @@ export function FAQSection() {
               initial="hidden"
               whileInView="show"
               viewport={VIEWPORT_ONCE}
-              className="font-sans text-[clamp(2.3rem,3.2vw,4.1rem)] font-normal tracking-[-0.04em] leading-[0.94] text-left uppercase text-[#111111]"
+              className="font-sans text-[clamp(2.3rem,3.2vw,4.1rem)] font-normal tracking-[-0.04em] leading-[0.94] text-left uppercase"
             >
-              <span className="block text-[#111111]">FREQUENTLY</span>
-              <span className="block text-[#6b6b6b] font-medium">ASKED QUESTIONS.</span>
+              <span className="block text-[#a4a4a2]">FREQUENTLY</span>
+              <span className="block text-white font-medium">ASKED QUESTIONS.</span>
             </motion.h2>
 
-            <p className="font-mono text-[10px] md:text-[11px] leading-relaxed text-[#6b6b6b] mt-4 md:mt-5 uppercase tracking-wide max-w-[280px]">
+            <p className="font-mono text-[12px] md:text-[14px] leading-relaxed text-[#a4a4a2] mt-4 md:mt-5 uppercase tracking-wide max-w-[300px]">
               COMMON QUESTIONS ABOUT <br />
-              <strong className="text-[#111111] font-semibold">ARMIA SYSTEMS</strong> &amp; ENGAGEMENTS.
+              <strong className="text-white font-semibold">ARMIA SYSTEMS</strong> &amp; ENGAGEMENTS.
             </p>
           </div>
 
@@ -3472,7 +4004,7 @@ export function FAQSection() {
             <div className="flex flex-col gap-4">
               <a
                 href="#contact"
-                className="font-mono text-[10px] md:text-[11px] text-[#ff5a00] tracking-widest uppercase hover:text-[#111111] transition-colors"
+                className="font-mono text-[12px] md:text-[14px] text-[#ff5a00] tracking-widest uppercase hover:text-white transition-colors"
               >
                 HAVE QUESTIONS? TALK TO US →
               </a>
@@ -3551,32 +4083,26 @@ export function BlogSection() {
           </div>
 
           {/* Heading Block: 30.3% to 69.3% */}
-          <div className="w-full md:w-[39.0%] px-6 md:px-0 pt-0.5 mb-6 md:mb-0">
-            <motion.h2
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="show"
-              viewport={VIEWPORT_ONCE}
-              className="font-sans text-[clamp(2.3rem,3.2vw,4.1rem)] font-normal tracking-[-0.04em] leading-[0.94] text-left uppercase text-[#111111]"
-            >
-              <span className="block text-[#777777]">INSIGHTS &</span>
-              <span className="block text-[#111111] font-medium">ENGINEERING BLOG.</span>
-            </motion.h2>
+          <div className="w-full md:w-[39.0%] px-6 md:px-0 pt-0.5 mb-4 md:mb-0">
+            <h2 className="font-sans text-[clamp(2.3rem,3.2vw,4.1rem)] font-normal tracking-[-0.04em] leading-[0.94] text-left">
+              <span className="block text-[#111111]">LATEST</span>
+              <span className="block text-[#6b6b6b] font-medium">INSIGHTS.</span>
+            </h2>
 
-            <p className="font-mono text-[10px] md:text-[11px] leading-relaxed text-[#666666] mt-4 md:mt-5 uppercase tracking-wide max-w-[280px]">
-              WE SHARE IDEAS, LESSONS, AND PRACTICAL INSIGHTS FROM OUR WORK.
+            <p className="font-mono text-[12px] md:text-[14px] leading-relaxed text-[#666666] mt-4 md:mt-5 uppercase tracking-wide max-w-[300px]">
+              ENGINEERING ARCHITECTURE, AI SYSTEMS &amp; TECH STRATEGY.
             </p>
           </div>
 
-          {/* Right Supporting Link: 69.3% to 88.8% */}
+          {/* Right Supporting Copy / Link: 69.3% to 88.8% */}
           <div className="w-full md:w-[19.5%] px-6 md:px-0 pt-1 flex justify-start">
             <div className="flex flex-col gap-4">
-              <Link
-                href="#all-articles"
-                className="font-mono text-[10px] md:text-[11px] text-[#ff5a00] tracking-widest uppercase hover:text-[#111111] transition-colors"
+              <a
+                href="#blog"
+                className="font-mono text-[12px] md:text-[14px] text-[#ff5a00] tracking-widest uppercase hover:text-[#111111] transition-colors"
               >
-                ALL ARTICLES →
-              </Link>
+                VIEW ALL ARTICLES →
+              </a>
             </div>
           </div>
         </div>
@@ -3669,7 +4195,7 @@ export function BlogSection() {
 
                     {/* Title */}
                     <Link href={article.href} className="block group/title">
-                      <h3 className="font-sans font-medium text-[13.5px] md:text-[14.5px] leading-[1.22] tracking-tight text-[#111111] mb-1.5 group-hover/title:text-brand-accent transition-colors line-clamp-2">
+                      <h3 className="font-sans font-medium text-[15px] md:text-[16px] leading-[1.3] tracking-tight text-[#111111] mb-1.5 group-hover/title:text-brand-accent transition-colors line-clamp-2">
                         {article.title}
                       </h3>
                     </Link>
@@ -3742,7 +4268,7 @@ export function FooterSection() {
     <footer
       id="contact"
       data-theme="dark"
-      className="relative w-full bg-[#0a0a0a] text-white pt-0 pb-12 overflow-hidden select-none border-t-[3px] border-brand-accent"
+      className="relative w-full bg-black text-white pt-0 pb-12 overflow-hidden select-none border-t-[3px] border-brand-accent"
     >
       <GridLines />
 
@@ -3755,7 +4281,7 @@ export function FooterSection() {
             initial="hidden"
             whileInView="show"
             viewport={VIEWPORT_ONCE}
-            className="lg:col-span-4 p-6 md:p-10 lg:p-12 flex flex-col justify-between h-full bg-[#0a0a0a]"
+            className="lg:col-span-4 p-6 md:p-10 lg:p-12 flex flex-col justify-between h-full bg-black"
           >
             <div className="flex flex-col justify-between flex-1">
               <div>

@@ -51,6 +51,22 @@ body {
   overflow-x: hidden;
 }
 
+@media (pointer: fine) {
+
+  *,
+  *::before,
+  *::after,
+  html,
+  body,
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    cursor: none !important;
+  }
+}
+
 ::selection {
   background-color: #ff5a00;
   color: #ffffff;

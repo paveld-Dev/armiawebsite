@@ -22,7 +22,7 @@ const AWARDS_LIST = [
 
 export function AwardsSection() {
   return (
-    <section className="relative z-20 w-full bg-white text-[#111111] py-14 md:py-18 border-t border-black/[0.08] select-none snap-section flex flex-col justify-center overflow-hidden">
+    <section className="relative z-20 w-full bg-white text-[#111111] py-10 md:py-14 border-t border-black/[0.08] select-none snap-section flex flex-col justify-center overflow-hidden h-[100svh] min-h-[100svh]">
       <div className="w-full max-w-[1920px] mx-auto px-6 md:px-0 relative z-10">
         {/* Upper Header Row matching Grid Columns */}
         <div className="relative w-full flex flex-col md:flex-row items-start mb-8 md:mb-10">
@@ -44,20 +44,19 @@ export function AwardsSection() {
               <span className="block text-[#6b6b6b] font-medium">RECOGNITION.</span>
             </motion.h2>
 
-            <p className="font-mono text-[10px] md:text-[11px] leading-relaxed text-[#6b6b6b] mt-3 md:mt-4 uppercase tracking-wide max-w-[280px]">
-              INDUSTRY HONORS &amp; VERIFIED <br />
-              <strong className="text-[#111111] font-semibold">ENGINEERING EXCELLENCE</strong>.
+            <p className="font-mono text-[12px] md:text-[14px] leading-relaxed text-[#6b6b6b] mt-3 md:mt-4 uppercase tracking-wide max-w-[300px]">
+              RECOGNIZED GLOBALLY BY LEADING RESEARCH AND ANALYST PLATFORMS.
             </p>
           </div>
 
-          {/* Right Supporting Meta: 69.3% to 88.8% */}
+          {/* Right Supporting Copy: 69.3% to 88.8% */}
           <div className="w-full md:w-[19.5%] px-6 md:px-0 pt-1 flex justify-start">
             <div className="flex flex-col gap-2">
-              <p className="font-mono text-[10px] md:text-[11px] text-[#ff5a00] tracking-widest uppercase font-semibold">
+              <p className="font-mono text-[12px] md:text-[13.5px] text-[#ff5a00] tracking-widest uppercase font-semibold">
                 20+ YEARS OF EXCELLENCE
               </p>
-              <p className="font-sans text-[13px] md:text-[14px] leading-tight text-[#666666] uppercase max-w-xs">
-                RECOGNIZED GLOBALLY BY LEADING RESEARCH AND ANALYST PLATFORMS.
+              <p className="font-sans text-[15px] md:text-[16px] leading-relaxed text-[#555555] uppercase max-w-xs">
+                GLOBAL RECOGNITION FOR ENGINEERING EXCELLENCE, PRODUCT DESIGN &amp; INNOVATION.
               </p>
             </div>
           </div>

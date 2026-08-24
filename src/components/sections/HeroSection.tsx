@@ -1,69 +1,111 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { useMousePosition } from "@/hooks/useMousePosition";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { EASE_CUSTOM } from "@/lib/motion";
 import { GridLines } from "@/components/ui/GridLines";
 import { PartnerTicker } from "@/components/sections/PartnerTicker";
 import { useAppReady } from "@/hooks/useAppReady";
 
+// Realistic Typewriter Effect with natural cadence and blinking cursor
+function TypewriterEffect({
+  text,
+  delay = 0.5,
+  baseSpeed = 24,
+  showCursor = true,
+  cursorClassName = "bg-[#FF5A00]",
+  className = "",
+  onComplete,
+}: {
+  text: string;
+  delay?: number;
+  baseSpeed?: number;
+  showCursor?: boolean;
+  cursorClassName?: string;
+  className?: string;
+  onComplete?: () => void;
+}) {
+  const [displayText, setDisplayText] = useState("");
+  const [isTypingComplete, setIsTypingComplete] = useState(false);
+  const isAppReady = useAppReady();
+  const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!isAppReady) return;
+
+    if (shouldReduceMotion) {
+      setDisplayText(text);
+      setIsTypingComplete(true);
+      if (onComplete) onComplete();
+      return;
+    }
+
+    let currentIndex = 0;
+    let timeoutId: NodeJS.Timeout;
+
+    const startTyping = () => {
+      const typeNextChar = () => {
+        if (currentIndex < text.length) {
+          currentIndex++;
+          setDisplayText(text.slice(0, currentIndex));
+
+          // Natural human cadence variation
+          const nextChar = text[currentIndex - 1];
+          let interval = baseSpeed + (Math.random() * 12 - 6);
+          if (nextChar === "," || nextChar === ".") interval += 90;
+          if (nextChar === " ") interval += 15;
+
+          timeoutId = setTimeout(typeNextChar, interval);
+        } else {
+          setIsTypingComplete(true);
+          if (onComplete) onComplete();
+        }
+      };
+
+      typeNextChar();
+    };
+
+    timeoutId = setTimeout(startTyping, delay * 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [text, delay, baseSpeed, isAppReady, shouldReduceMotion, onComplete]);
+
+  return (
+    <span className={className}>
+      {displayText}
+      {showCursor && (
+        <span
+          className={`inline-block ml-1 align-baseline transition-opacity duration-150 ${cursorClassName} ${isTypingComplete ? "animate-pulse" : "opacity-100"
+            }`}
+          style={{
+            width: "0.12em",
+            height: "0.9em",
+            transform: "translateY(0.08em)",
+          }}
+          aria-hidden="true"
+        />
+      )}
+    </span>
+  );
+}
+
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { x } = useMousePosition();
-  const reducedMotion = useReducedMotion();
   const isAppReady = useAppReady();
-
-  const bgScale = 1.02;
-  const bgY = "0%";
-
-  const titleY = 0;
-  const titleOpacity = 1;
-
-  const topMetaY = 0;
-  const rightMetaY = 0;
-
-  const mouseXOffset = reducedMotion
-    ? 0
-    : Math.max(
-      -14,
-      Math.min(
-        14,
-        (x / (typeof window !== "undefined" ? window.innerWidth : 1440) - 0.5) * 18
-      )
-    );
-
-  const letterVariants = {
-    hidden: { y: "125%", opacity: 0 },
-    visible: (i: number) => ({
-      y: "0%",
-      opacity: 1,
-      transition: {
-        duration: 0.95,
-        ease: EASE_CUSTOM,
-        delay: 0.15 + i * 0.04,
-      },
-    }),
-  };
-
-  const titleLetters = ["A", "R", "M", "I", "A"];
 
   return (
     <section
       ref={containerRef}
-      className="relative w-full h-[100svh] overflow-hidden bg-surface-deep text-white select-none snap-section flex flex-col justify-between"
+      data-theme="hero"
+      className="sticky top-0 z-0 w-full h-[100svh] overflow-hidden bg-surface-deep text-white select-none snap-section flex flex-col justify-between"
       aria-label="Hero"
     >
-      <motion.div
+      {/* ── Ambient Video, Background & Overlay ── */}
+      <div
         aria-hidden
         className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden"
-        style={{
-          scale: reducedMotion ? 1 : bgScale,
-          y: reducedMotion ? 0 : bgY,
-          x: mouseXOffset,
-        }}
       >
         <video
           autoPlay
@@ -85,84 +127,87 @@ export function HeroSection() {
             priority
           />
         </div>
-      </motion.div>
+      </div>
 
+      {/* ── Grid Lines ── */}
       <GridLines />
 
-      <motion.div
-        style={{ y: reducedMotion ? 0 : topMetaY }}
-        className="absolute left-6 md:left-[49.8%] top-[40%] md:top-[46%] z-10 -translate-y-1/2 md:translate-y-0"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.15, ease: EASE_CUSTOM }}
-          className="font-mono text-[11px] md:text-xs tracking-[0.14em] uppercase text-white/90 space-y-1"
-        >
-          <p className="font-normal text-white">END-TO-END SOFTWARE</p>
-          <p className="font-normal text-white">ENGINEERING</p>
-          <p className="text-white/60">SINCE 2001</p>
-          <div className="h-1.5 w-1.5 bg-brand-accent mt-3" aria-hidden />
-        </motion.div>
-      </motion.div>
+      {/* ── Main Hero Content Area (Aligned to 10.8% - 88.8% Grid Lines) ── */}
+      <div className="relative z-10 w-full max-w-[1920px] mx-auto px-6 md:px-0 pt-28 md:pt-32 pb-14 md:pb-20 lg:pb-24 flex-1 flex flex-col justify-end">
+        <div className="w-full md:w-[78.0%] md:ml-[10.8%] flex flex-col">
 
-      <motion.div
-        style={{ y: reducedMotion ? 0 : rightMetaY }}
-        className="absolute right-6 md:right-auto md:left-[69.3%] top-[40%] md:top-[46%] z-10 -translate-y-1/2 md:translate-y-0"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.25, ease: EASE_CUSTOM }}
-          className="font-mono text-[11px] md:text-xs tracking-[0.14em] uppercase text-white/90 space-y-1.5"
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-white/50">/01</span>
-            <span className="font-normal text-white">CUSTOM SOFTWARE</span>
+          {/* Top Tagline / Context Monospace Header — Aligned to Grid Line 1 (10.8%) */}
+          <div className="w-full mb-3">
+            <span className="font-mono text-[11px] sm:text-[13px] tracking-[0.25em] sm:tracking-[0.35em] text-[#FF5A00] font-bold uppercase flex items-center">
+              <TypewriterEffect
+                text="[ 20+ YEARS OF SOFTWARE ENGINEERING ]"
+                delay={0.3}
+                baseSpeed={28}
+                showCursor={true}
+                cursorClassName="bg-[#FF5A00] h-3.5 sm:h-4 w-1"
+              />
+            </span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-white/50">/02</span>
-            <span className="font-normal text-white">AI &amp; CLOUD</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-white/50">/03</span>
-            <span className="font-normal text-white">UX &amp; DESIGN</span>
-          </div>
-          <div className="h-1.5 w-1.5 bg-brand-accent mt-3" aria-hidden />
-        </motion.div>
-      </motion.div>
 
-      <motion.div
-        style={{ y: reducedMotion ? 0 : titleY, opacity: reducedMotion ? 1 : titleOpacity }}
-        className="absolute left-6 md:left-[49.8%] right-6 md:right-[11.2%] top-[55%] md:top-[58%] z-10 pointer-events-none"
-      >
-        <div className="leading-none select-none w-full">
-          <h1 className="flex justify-between items-baseline w-full font-sans font-normal text-[clamp(4rem,8.2vw,9.8rem)] tracking-tight leading-[0.82] text-white">
-            {titleLetters.map((char, index) => (
-              <span key={index} className="inline-block overflow-hidden">
+          {/* Bold Impact Headline & Right Copy (Line 1: 10.8% -> Line 3: 49.8% -> Line 5: 88.8%) */}
+          <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-0 items-end">
+
+            {/* Left Big Headline (Grid Line 1 to Line 3 -> 6 cols / 50% of content) */}
+            <div className="lg:col-span-7 lg:pr-8">
+              <h1 className="font-sans font-black text-[clamp(2.4rem,4.2vw,4.8rem)] leading-[0.93] tracking-[-0.035em] text-white uppercase select-none">
                 <motion.span
-                  custom={index}
-                  initial="hidden"
-                  animate={isAppReady ? "visible" : "hidden"}
-                  variants={letterVariants}
-                  className="inline-block"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                  transition={{ duration: 0.9, delay: 0.2, ease: EASE_CUSTOM }}
+                  className="block"
                 >
-                  {char}
+                  DIGITAL PRODUCTS
                 </motion.span>
-              </span>
-            ))}
-          </h1>
-        </div>
+                <motion.span
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                  transition={{ duration: 0.9, delay: 0.3, ease: EASE_CUSTOM }}
+                  className="block text-white/95"
+                >
+                  ENGINEERED TO
+                </motion.span>
+                <motion.span
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                  transition={{ duration: 0.9, delay: 0.4, ease: EASE_CUSTOM }}
+                  className="block text-white/85"
+                >
+                  SCALE WITHOUT LIMITS.
+                </motion.span>
+              </h1>
+            </div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 14 }}
-          animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
-          transition={{ duration: 0.8, delay: 0.55, ease: EASE_CUSTOM }}
-          className="font-sans font-normal text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 leading-snug tracking-tight max-w-[540px] mt-4 md:mt-6"
-        >
-          Reliable software engineering, trusted by enterprise teams since 2001.
-        </motion.p>
-      </motion.div>
+            {/* Right Supporting Value Statement & Lifecycle Summary (Terminates flush at Line 5 / 88.8%) */}
+            <div className="lg:col-span-5 pb-1 flex flex-col justify-end">
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.85, delay: 0.55, ease: EASE_CUSTOM }}
+                className="font-sans text-[22px] sm:text-[26px] md:text-[29px] text-white/95 leading-[1.3] font-normal tracking-tight"
+              >
+                We design and engineer custom software, enterprise AI products, and cloud platforms with craft, agility, and precision.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
+                transition={{ duration: 0.85, delay: 0.7, ease: EASE_CUSTOM }}
+                className="mt-6 pt-4 border-t border-white/15 flex items-center justify-between text-white/65 font-mono text-[13px] sm:text-[14.5px] uppercase tracking-[0.2em]"
+              >
+                <span>EST. 2001</span>
+                <span className="text-[#FF5A00] font-semibold">WORLDWIDE IMPACT &bull;</span>
+              </motion.div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
 
       {/* Pinned Bottom Partner Ticker Bar */}
       <div className="relative z-20 w-full mt-auto">
