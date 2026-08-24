@@ -93,7 +93,7 @@ export function CursorFollower() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-50 overflow-hidden select-none hidden lg:block"
+      className="pointer-events-none fixed inset-0 z-[9999] overflow-hidden select-none hidden lg:block"
     >
       {/* ── Clean Geometric Arrow Cursor (Armia Brand Orange) ── */}
       <div
