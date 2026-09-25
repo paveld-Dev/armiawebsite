@@ -1,5 +1,5 @@
 import { Header } from "@/components/layout/Header";
-import { HeroSection } from "@/components/sections/HeroSection";
+import { HeroSectionWrapper } from "@/components/sections/HeroSectionWrapper";
 import { EngineeringIntro } from "@/components/sections/EngineeringIntro";
 import { ServicesSection } from "@/components/sections/ServicesSection";
 import { ProcessSection } from "@/components/sections/ProcessSection";
@@ -16,8 +16,8 @@ export default function Home() {
       {/* Top Header Overlay */}
       <Header />
 
-      {/* 1. Hero Section (includes pinned Partner Ticker at bottom) */}
-      <HeroSection />
+      {/* 1. Hero Section (Switchable: Hero 1 / Hero 2) */}
+      <HeroSectionWrapper />
 
       {/* 2. Section 02 — 24+ Years Engineering Credibility */}
       <EngineeringIntro />

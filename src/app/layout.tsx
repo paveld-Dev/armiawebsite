@@ -4,6 +4,7 @@ import "./globals.css";
 import { CursorFollower } from "@/components/effects/CursorFollower";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { ScrollToTopOnReload } from "@/components/utils/ScrollToTopOnReload";
+import { HeroProvider } from "@/context/HeroContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,10 +47,12 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full bg-surface-deep font-sans text-foreground selection:bg-brand-accent selection:text-white"
       >
-        <ScrollToTopOnReload />
-        <PageLoader />
-        <CursorFollower />
-        {children}
+        <HeroProvider>
+          <ScrollToTopOnReload />
+          <PageLoader />
+          <CursorFollower />
+          {children}
+        </HeroProvider>
       </body>
     </html>
   );

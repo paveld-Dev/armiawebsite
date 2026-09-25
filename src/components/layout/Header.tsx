@@ -6,6 +6,8 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { EASE_CUSTOM } from "@/lib/motion";
+import { HeroSwitcher } from "@/components/ui/HeroSwitcher";
+import { useHeroVariant } from "@/context/HeroContext";
 
 const NAV_ITEMS = [
   "SERVICES",
@@ -18,6 +20,7 @@ const NAV_ITEMS = [
 ] as const;
 
 export function Header() {
+  const { activeHero } = useHeroVariant();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [headerTheme, setHeaderTheme] = useState<"hero" | "white" | "dark">("hero");
 
@@ -139,8 +142,8 @@ export function Header() {
             : "bg-black py-4 md:py-5 text-white"
         }`}
       >
-        {/* Subtle Noise Texture Overlay - Only in Hero mode */}
-        {isHero && (
+        {/* Subtle Noise Texture Overlay - Only in Hero 1 mode */}
+        {isHero && activeHero === "hero1" && (
           <div
             aria-hidden="true"
             className="absolute inset-0 opacity-[0.06] pointer-events-none mix-blend-overlay bg-[url('/images/Noise.png')]"
@@ -165,6 +168,8 @@ export function Header() {
             </Link>
 
             <div className="flex items-center">
+              <HeroSwitcher isWhiteHeader={isWhite} />
+
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen((v) => !v)}
@@ -177,8 +182,8 @@ export function Header() {
                 }`}
               >
                 <span className="px-4 md:px-6 font-medium">MENU</span>
-                <div className="flex items-center justify-center h-full w-[36px] md:w-[40px] bg-brand-accent transition-colors duration-300 group-hover:bg-[#ff4500]">
-                  <span className="text-white text-xs md:text-sm font-semibold" aria-hidden>
+                <div className="flex items-center justify-center h-full w-[36px] md:w-[40px] bg-brand-accent transition-all duration-300 group-hover:bg-[#ff4500]">
+                  <span className="text-white text-xs md:text-sm font-semibold transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden>
                     ›
                   </span>
                 </div>
