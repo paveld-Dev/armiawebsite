@@ -40,7 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# large media files (> 50MB)
-*.mp4
-/public/videos/
-/public/images/*.mp4
+# large media files (> 50MB) - GitHub has a 100MB file limit
+public/videos/armia2.mp4
