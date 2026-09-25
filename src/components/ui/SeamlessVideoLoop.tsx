@@ -28,6 +28,11 @@ export function SeamlessVideoLoop({
     const v2 = video2Ref.current;
     if (!v1 || !v2) return;
 
+    // Explicitly enforce muted programmatically (critical for mobile & production autoplay policies)
+    v1.muted = true;
+    v2.muted = true;
+    v1.play().catch(() => {});
+
     let animId: number;
 
     const checkCrossfade = () => {
