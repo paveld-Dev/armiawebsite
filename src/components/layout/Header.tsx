@@ -134,12 +134,12 @@ export function Header() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-40 w-full transition-colors duration-300 select-none ${
+        className={`fixed top-0 left-0 right-0 z-40 w-full transition-all duration-300 select-none backdrop-blur-md bg-white/[0.08] border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] ${
           isHero
-            ? "bg-transparent py-6 md:py-8 text-white"
+            ? "py-5 md:py-6 text-white"
             : isWhite
-            ? "bg-white py-4 md:py-5 text-[#111111]"
-            : "bg-black py-4 md:py-5 text-white"
+            ? "bg-white/70 text-[#111111] border-neutral-200/60 py-4 md:py-5"
+            : "bg-black/40 text-white border-white/10 py-4 md:py-5"
         }`}
       >
         {/* Subtle Noise Texture Overlay - Only in Hero 1 mode */}
