@@ -28,10 +28,24 @@ export function SeamlessVideoLoop({
     const v2 = video2Ref.current;
     if (!v1 || !v2) return;
 
-    // Explicitly enforce muted programmatically (critical for mobile & production autoplay policies)
+    v1.src = src;
+    v2.src = src;
+    v1.load();
+    v2.load();
     v1.muted = true;
     v2.muted = true;
     v1.play().catch(() => {});
+    setActiveVideo(1);
+  }, [src]);
+
+  useEffect(() => {
+    const v1 = video1Ref.current;
+    const v2 = video2Ref.current;
+    if (!v1 || !v2) return;
+
+    // Explicitly enforce muted programmatically (critical for mobile & production autoplay policies)
+    v1.muted = true;
+    v2.muted = true;
 
     let animId: number;
 
@@ -66,6 +80,7 @@ export function SeamlessVideoLoop({
       {/* Video 1 */}
       <video
         ref={video1Ref}
+        src={src}
         autoPlay
         muted
         playsInline
@@ -73,22 +88,19 @@ export function SeamlessVideoLoop({
         className={`absolute inset-0 h-full w-full ${fitClass} object-center transition-opacity duration-1000 ease-in-out ${
           activeVideo === 1 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
         }`}
-      >
-        <source src={src} type="video/mp4" />
-      </video>
+      />
 
       {/* Video 2 */}
       <video
         ref={video2Ref}
+        src={src}
         muted
         playsInline
         preload="auto"
         className={`absolute inset-0 h-full w-full ${fitClass} object-center transition-opacity duration-1000 ease-in-out ${
           activeVideo === 2 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
         }`}
-      >
-        <source src={src} type="video/mp4" />
-      </video>
+      />
     </div>
   );
 }

@@ -120,7 +120,7 @@ export function HeroSection2() {
         {/* Scaled butterfly video container */}
         <div className="relative w-[85vw] max-w-[1020px] aspect-[16/9] max-h-[700px] flex items-center justify-center">
           <SeamlessVideoLoop
-            src="/videos/Butterfly_e.mp4"
+            src="/videos/Butterfly.mp4"
             crossFadeDuration={1.2}
             objectFit="contain"
             className="h-full w-full"
