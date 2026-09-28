@@ -143,8 +143,8 @@ export function Header() {
         }`}
       >
 
-        <div className="relative z-10 w-full max-w-[1920px] mx-auto px-6 md:px-0">
-          <div className="w-full md:w-[78%] md:ml-[10.8%] flex items-center justify-between">
+        <div className="relative z-10 w-full max-w-[1920px] mx-auto px-6 sm:px-12 md:px-20 lg:px-28">
+          <div className="w-full flex items-center justify-between">
             <Link
               href="/"
               className="group flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent rounded-sm"
@@ -168,15 +168,63 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen((v) => !v)}
                 aria-expanded={isMobileMenuOpen}
                 aria-controls="mobile-nav"
-                className={`group flex items-center h-[36px] md:h-[40px] font-mono text-[11px] md:text-xs tracking-[0.16em] uppercase transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent ${
+                aria-label="Open navigation menu"
+                className={`group relative inline-flex items-center h-[38px] md:h-[42px] font-mono text-[11px] md:text-xs tracking-[0.16em] uppercase transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent border ${
                   isWhite
-                    ? "bg-[#111111] text-white"
-                    : "bg-[#1a1a1a] text-white"
+                    ? "border-neutral-300 hover:border-brand-accent shadow-[0_0_15px_rgba(255,90,0,0)] hover:shadow-[0_0_20px_rgba(255,90,0,0.15)]"
+                    : "border-white/20 hover:border-brand-accent shadow-[0_0_15px_rgba(255,90,0,0)] hover:shadow-[0_0_20px_rgba(255,90,0,0.18)]"
                 }`}
               >
-                <span className="px-4 md:px-6 font-medium">MENU</span>
-                <div className="flex items-center justify-center h-full w-[36px] md:w-[40px] bg-brand-accent transition-all duration-300 group-hover:bg-[#ff4500]">
-                  <span className="text-white text-xs md:text-sm font-semibold transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden>
+                {/* Button Body with Animated Tech Lines */}
+                <span
+                  className={`relative overflow-hidden px-4 md:px-6 font-medium h-full flex items-center select-none transition-colors duration-300 ${
+                    isWhite ? "bg-white text-neutral-900 group-hover:text-black" : "bg-[#111111] text-white"
+                  }`}
+                >
+                  {/* 1. Subtle Circuit Grid Lines on Hover */}
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:8px_8px]"
+                  />
+
+                  {/* 1b. Slowly Drifting Architectural Tech Blocks */}
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 pointer-events-none overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                  >
+                    <span className="absolute top-[20%] left-[-20%] w-2.5 h-2 rounded-[1px] bg-white/10 border border-white/20 group-hover:translate-x-[180px] transition-transform duration-[4500ms] ease-linear" />
+                    <span className="absolute top-[55%] left-[-25%] w-3.5 h-1.5 rounded-[1px] bg-[#FF5A00]/25 border border-[#FF5A00]/40 group-hover:translate-x-[190px] transition-transform duration-[3800ms] ease-linear delay-100" />
+                    <span className="absolute top-[35%] left-[-15%] w-2 h-2 rounded-[1px] bg-white/15 border border-white/25 group-hover:translate-x-[180px] transition-transform duration-[5200ms] ease-linear delay-200" />
+                  </span>
+
+                  {/* 2. Cyber Horizontal Scanning Ray Beam */}
+                  <span
+                    aria-hidden="true"
+                    className="absolute top-0 bottom-0 -left-[100%] w-[80%] bg-gradient-to-r from-transparent via-[#FF5A00]/25 to-transparent pointer-events-none -skew-x-12 opacity-0 group-hover:opacity-100 group-hover:translate-x-[260%] transition-all duration-1000 ease-out"
+                  />
+
+                  {/* 3. Horizontal Micro Circuit Trace Lines */}
+                  <span
+                    aria-hidden="true"
+                    className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#FF5A00] to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#FF5A00] to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-right"
+                  />
+
+                  {/* Text Content */}
+                  <span className="relative z-10 transition-transform duration-300 group-hover:tracking-[0.18em]">
+                    MENU
+                  </span>
+                </span>
+
+                {/* Orange Indicator Block */}
+                <div className="relative overflow-hidden flex items-center justify-center h-full w-[38px] md:w-[42px] bg-brand-accent transition-all duration-300 group-hover:bg-[#ff4500]">
+                  <span
+                    className="text-white text-xs md:text-sm font-semibold transition-transform duration-200 group-hover:translate-x-0.5"
+                    aria-hidden
+                  >
                     ›
                   </span>
                 </div>
