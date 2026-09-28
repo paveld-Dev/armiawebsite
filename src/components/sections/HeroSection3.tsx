@@ -91,6 +91,12 @@ export function HeroSection3() {
             objectPosition="right"
             className="h-full w-full"
           />
+
+          {/* Black overlay patch covering watermark in bottom-right corner */}
+          <div
+            aria-hidden="true"
+            className="absolute bottom-[23%] md:bottom-[25%] lg:bottom-[26%] right-5 sm:right-9 md:right-11 lg:right-18 w-20 h-20 sm:w-24 sm:h-24 bg-black rounded-lg blur-[3px] pointer-events-none z-10"
+          />
         </div>
       </div>
 

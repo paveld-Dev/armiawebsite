@@ -30,10 +30,10 @@ export function HeroSwitcher({ isWhiteHeader }: HeroSwitcherProps) {
         onClick={() => setIsOpen((prev) => !prev)}
         aria-haspopup="true"
         aria-expanded={isOpen}
-        className={`group flex items-center gap-2 h-[36px] md:h-[40px] px-3 md:px-4 font-mono text-[11px] md:text-xs tracking-[0.12em] uppercase transition-all duration-200 border focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent ${
+        className={`group flex items-center gap-2 h-[38px] md:h-[42px] px-3.5 md:px-4 font-mono text-[11px] md:text-xs tracking-[0.12em] uppercase transition-all duration-300 border focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent ${
           isWhiteHeader
-            ? "bg-neutral-100 hover:bg-neutral-200 text-neutral-900 border-neutral-300"
-            : "bg-[#141414]/90 hover:bg-[#1f1f1f] text-neutral-200 border-white/15 backdrop-blur-sm"
+            ? "bg-white hover:bg-neutral-100 text-neutral-900 border-neutral-300 hover:border-brand-accent shadow-[0_0_15px_rgba(255,90,0,0)] hover:shadow-[0_0_20px_rgba(255,90,0,0.12)]"
+            : "bg-[#111111] hover:bg-[#181818] text-neutral-200 border-white/20 hover:border-brand-accent shadow-[0_0_15px_rgba(255,90,0,0)] hover:shadow-[0_0_20px_rgba(255,90,0,0.18)]"
         }`}
       >
         <Sparkles className="w-3.5 h-3.5 text-brand-accent animate-pulse" />
@@ -42,7 +42,7 @@ export function HeroSwitcher({ isWhiteHeader }: HeroSwitcherProps) {
         </span>
         <ChevronDown
           className={`w-3.5 h-3.5 transition-transform duration-200 ${
-            isOpen ? "rotate-180 text-brand-accent" : "text-neutral-400"
+            isOpen ? "rotate-180 text-brand-accent" : "text-neutral-400 group-hover:text-neutral-200"
           }`}
         />
       </button>
