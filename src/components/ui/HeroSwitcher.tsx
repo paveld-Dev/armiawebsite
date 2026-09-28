@@ -88,7 +88,7 @@ export function HeroSwitcher({ isWhiteHeader }: HeroSwitcherProps) {
                 : "text-neutral-300 hover:bg-white/5"
             }`}
           >
-            <span>Hero 2 (Butterfly)</span>
+            <span>Hero 2 (Mechanical)</span>
             {activeHero === "hero2" && (
               <span className="w-1.5 h-1.5 rounded-full bg-brand-accent" />
             )}
@@ -107,7 +107,7 @@ export function HeroSwitcher({ isWhiteHeader }: HeroSwitcherProps) {
                 : "text-neutral-300 hover:bg-white/5"
             }`}
           >
-            <span>Hero 3 (New)</span>
+            <span>Hero 3 (Butterfly)</span>
             {activeHero === "hero3" && (
               <span className="w-1.5 h-1.5 rounded-full bg-brand-accent" />
             )}

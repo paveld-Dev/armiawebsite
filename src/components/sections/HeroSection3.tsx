@@ -1,427 +1,259 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import Image from "next/image";
-import { motion, useSpring, useMotionValue } from "framer-motion";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import React, { useRef } from "react";
+import { motion } from "framer-motion";
 import { EASE_CUSTOM } from "@/lib/motion";
 import { useAppReady } from "@/hooks/useAppReady";
+import { SeamlessVideoLoop } from "@/components/ui/SeamlessVideoLoop";
 import { PartnerTicker } from "@/components/sections/PartnerTicker";
-import { GridLines } from "@/components/ui/GridLines";
-import { ArrowDown, Code2, Cpu, Cloud, ShieldCheck, Terminal, Layers } from "lucide-react";
-
-interface ArmiaPillarTile {
-  id: string;
-  tag: string;
-  category: string;
-  spec: string;
-  image: string;
-  top?: string;
-  bottom?: string;
-  left?: string;
-  right?: string;
-  width: string;
-  height: string;
-  floatDelay: number;
-  floatDuration: number;
-  floatDistance: number;
-  icon: React.ComponentType<{ className?: string }>;
-}
-
-const PILLARS: ArmiaPillarTile[] = [
-  {
-    id: "pillar-1",
-    tag: "SYS // AI & ML",
-    category: "AI & INTELLIGENCE LABS",
-    spec: "LLM Orchestration & Agentic RAG",
-    image: "/images/tile_ai_brain.jpg",
-    top: "8%",
-    left: "2.5%",
-    width: "13vw",
-    height: "22vh",
-    floatDelay: 0,
-    floatDuration: 5.5,
-    floatDistance: 10,
-    icon: Cpu,
-  },
-  {
-    id: "pillar-2",
-    tag: "SYS // CLOUD",
-    category: "DEVOPS & KUBERNETES",
-    spec: "Multi-Region Zero-Downtime Infra",
-    image: "/images/tile_cloud_mesh.jpg",
-    bottom: "10%",
-    left: "2.5%",
-    width: "13vw",
-    height: "22vh",
-    floatDelay: 0.8,
-    floatDuration: 6.2,
-    floatDistance: 12,
-    icon: Cloud,
-  },
-  {
-    id: "pillar-3",
-    tag: "SYS // ARCH",
-    category: "CUSTOM SOFTWARE",
-    spec: "High-Concurrency Enterprise Engines",
-    image: "/images/tile_architecture.jpg",
-    bottom: "6%",
-    left: "17%",
-    width: "14vw",
-    height: "18vh",
-    floatDelay: 0.4,
-    floatDuration: 5.8,
-    floatDistance: 9,
-    icon: Code2,
-  },
-  {
-    id: "pillar-4",
-    tag: "SYS // SEC",
-    category: "ENTERPRISE SECURITY",
-    spec: "SOC2 Type II & HIPAA Compliance",
-    image: "/images/tile_security.jpg",
-    top: "8%",
-    right: "2.5%",
-    width: "13vw",
-    height: "22vh",
-    floatDelay: 1.2,
-    floatDuration: 6.5,
-    floatDistance: 11,
-    icon: ShieldCheck,
-  },
-  {
-    id: "pillar-5",
-    tag: "SYS // SRE",
-    category: "SRE & RELIABILITY",
-    spec: "99.99% Guaranteed SLA Uptime",
-    image: "/images/tile_sre.jpg",
-    bottom: "10%",
-    right: "2.5%",
-    width: "13vw",
-    height: "22vh",
-    floatDelay: 0.2,
-    floatDuration: 5.2,
-    floatDistance: 12,
-    icon: Terminal,
-  },
-  {
-    id: "pillar-6",
-    tag: "SYS // CORE",
-    category: "PRODUCT ENGINEERING",
-    spec: "End-to-End Modernization Lifecycle",
-    image: "/images/tile_product_core.jpg",
-    top: "6%",
-    right: "17%",
-    width: "14vw",
-    height: "18vh",
-    floatDelay: 1.6,
-    floatDuration: 6.0,
-    floatDistance: 9,
-    icon: Layers,
-  },
-];
 
 export function HeroSection3() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isAppReady = useAppReady();
-  const shouldReduceMotion = useReducedMotion();
-  const [activePillar, setActivePillar] = useState<ArmiaPillarTile | null>(null);
 
-  // Parallax motion values with subtle cursor inertia
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const springConfig = { damping: 28, stiffness: 45, mass: 0.8 };
-  const smoothX = useSpring(mouseX, springConfig);
-  const smoothY = useSpring(mouseY, springConfig);
-
-  // Inverted parallax for foreground tiles (creates genuine multiplane depth)
-  const foregroundSpringConfig = { damping: 25, stiffness: 40, mass: 0.6 };
-  const fgX = useSpring(useMotionValue(0), foregroundSpringConfig);
-  const fgY = useSpring(useMotionValue(0), foregroundSpringConfig);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (shouldReduceMotion) return;
-    const { clientX, clientY, currentTarget } = e;
-    const rect = currentTarget.getBoundingClientRect();
-    const xPercent = (clientX - rect.left) / rect.width - 0.5;
-    const yPercent = (clientY - rect.top) / rect.height - 0.5;
-
-    // Background moves with cursor
-    mouseX.set(xPercent * 32);
-    mouseY.set(yPercent * 24);
-
-    // Foreground tiles move inversely to amplify depth
-    fgX.set(-xPercent * 20);
-    fgY.set(-yPercent * 16);
+  // Staggered line entrance variants
+  const headlineLineVariants = {
+    hidden: { opacity: 0, y: 32 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        delay: 0.15 + i * 0.12,
+        ease: EASE_CUSTOM,
+      },
+    }),
   };
 
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-    fgX.set(0);
-    fgY.set(0);
+  const subcopyVariants = {
+    hidden: { opacity: 0, y: 18 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        delay: 0.55,
+        ease: EASE_CUSTOM,
+      },
+    },
+  };
+
+  const ctaVariants = {
+    hidden: { opacity: 0, y: 16 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        delay: 0.65,
+        ease: EASE_CUSTOM,
+      },
+    },
+  };
+
+  const footerLineVariants = {
+    hidden: { opacity: 0, y: 14 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        delay: 0.75,
+        ease: EASE_CUSTOM,
+      },
+    },
   };
 
   return (
     <section
       ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      data-theme="white"
-      className="relative z-0 w-full min-h-[100svh] overflow-hidden bg-[#fafafa] text-[#111111] select-none flex flex-col justify-between"
-      aria-label="Armia Systems Inc. Engineering Standard Hero"
+      data-theme="hero"
+      className="relative z-0 w-full min-h-[100svh] overflow-hidden bg-[#0A0A0A] text-white select-none flex flex-col justify-between [perspective:1200px]"
+      aria-label="Armia Systems Inc. Hero"
     >
-      {/* ── Architectural Grid Lines ── */}
-      <GridLines light={true} />
-
-      {/* ── Atmospheric Visuals Window: Subtle Neural Networks, Prisms, Circuit traces ── */}
-      <div className="relative w-full h-[64vh] sm:h-[70vh] md:h-[72vh] overflow-hidden pt-20 sm:pt-24 md:pt-28 border-b border-neutral-200">
-        
-        {/* Abstract Technology Visuals Backdrop */}
-        <motion.div
-          aria-hidden
-          style={{ x: smoothX, y: smoothY }}
-          animate={
-            shouldReduceMotion
-              ? undefined
-              : {
-                  scale: [1, 1.025, 1],
-                  filter: ["brightness(0.95) contrast(1.05)", "brightness(1.02) contrast(1.08)", "brightness(0.95) contrast(1.05)"],
-                }
-          }
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute -inset-[6%] z-0 pointer-events-none select-none will-change-transform"
-        >
-          <Image
-            src="/images/hero3_tech_atmosphere.jpg"
-            alt="Armia Systems Neural Engineering Backdrop"
-            fill
-            sizes="100vw"
-            className="object-cover object-center filter saturate-[1.15] opacity-95"
-            priority
-          />
-        </motion.div>
-
-        {/* Ambient Film Grain Texture */}
+      {/* ── Butterfly Looping Video (Right-Aligned) ── */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-y-0 right-0 z-[1] w-full md:w-[60vw] lg:w-[58vw] xl:w-[55vw] pointer-events-none select-none overflow-hidden flex items-center justify-end"
+      >
+        {/* Right-aligned container with vertical fill and horizontal left-edge fade */}
         <div
-          aria-hidden="true"
-          className="absolute inset-0 z-[1] opacity-[0.035] pointer-events-none mix-blend-overlay bg-[url('/images/Noise.png')]"
-        />
-
-        {/* Floating Architectural Pillar Photo Tiles with Specular Hover */}
-        {PILLARS.map((pillar, index) => {
-          const Icon = pillar.icon;
-          const isSelected = activePillar?.id === pillar.id;
-
-          return (
-            <motion.div
-              key={pillar.id}
-              initial={{ opacity: 0, scale: 0.9, y: 30 }}
-              animate={
-                isAppReady
-                  ? {
-                      opacity: 1,
-                      scale: 1,
-                      y: shouldReduceMotion
-                        ? 0
-                        : [0, -pillar.floatDistance, 0, pillar.floatDistance * 0.6, 0],
-                    }
-                  : { opacity: 0, scale: 0.9, y: 30 }
-              }
-              transition={
-                isAppReady
-                  ? {
-                      opacity: { duration: 0.7, delay: index * 0.08 },
-                      scale: { duration: 0.7, delay: index * 0.08 },
-                      y: {
-                        duration: pillar.floatDuration,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: pillar.floatDelay,
-                      },
-                    }
-                  : undefined
-              }
-              style={{
-                top: pillar.top,
-                bottom: pillar.bottom,
-                left: pillar.left,
-                right: pillar.right,
-                width: pillar.width,
-                height: pillar.height,
-                x: fgX,
-              }}
-              onMouseEnter={() => setActivePillar(pillar)}
-              onMouseLeave={() => setActivePillar(null)}
-              className={`absolute z-10 hidden sm:block p-1 bg-white/30 backdrop-blur-md border transition-all duration-300 cursor-pointer group shadow-[0_12px_32px_rgba(0,0,0,0.18)] will-change-transform ${
-                isSelected
-                  ? "border-[#ff5a00] scale-105 z-30 shadow-[0_16px_40px_rgba(255,90,0,0.35)] ring-2 ring-[#ff5a00]/50"
-                  : "border-white/70 hover:scale-105 hover:z-20 hover:border-white"
-              }`}
-            >
-              {/* Specular Shimmer Sweep */}
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none z-20" />
-
-              {/* Conceptual Photo Artwork */}
-              <div className="w-full h-full relative overflow-hidden bg-neutral-900">
-                <Image
-                  src={pillar.image}
-                  alt={pillar.category}
-                  fill
-                  sizes="(max-width: 1200px) 25vw, 18vw"
-                  className="object-cover object-center filter saturate-[1.1] contrast-[1.05] group-hover:scale-110 transition-transform duration-500 ease-out"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
-
-                <div className="relative z-10 p-2 flex items-center justify-between text-white font-mono text-[9px] font-bold">
-                  <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded-sm border border-white/10">
-                    <Icon className="w-3 h-3 text-[#ff5a00] group-hover:rotate-12 transition-transform duration-300" />
-                    <span className="tracking-wider">{pillar.tag}</span>
-                  </div>
-                </div>
-
-                <div className="relative z-10 p-2 pt-0 hidden lg:block text-[10px] font-sans font-medium text-white/90 leading-tight drop-shadow-sm">
-                  {pillar.spec}
-                </div>
-              </div>
-
-              {/* Corner Tag */}
-              <div className="absolute bottom-1 right-1 px-2 py-0.5 bg-black text-white font-mono text-[9px] font-bold tracking-widest uppercase shadow-sm group-hover:bg-[#ff5a00] transition-colors duration-200 z-10">
-                {pillar.tag}
-              </div>
-            </motion.div>
-          );
-        })}
-
-        {/* ── Clean Black Rectangular Content Block Centered with Soft Drop Shadow ── */}
-        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none px-4 sm:px-6 pt-10">
-          <motion.div
-            initial={{ scale: 0.94, opacity: 0, y: 20 }}
-            animate={isAppReady ? { scale: 1, opacity: 1, y: 0 } : { scale: 0.94, opacity: 0, y: 20 }}
-            transition={{ duration: 0.85, delay: 0.2, ease: EASE_CUSTOM }}
-            className="relative bg-black text-white px-6 sm:px-12 md:px-16 lg:px-20 py-7 sm:py-9 md:py-11 shadow-[0_25px_70px_rgba(0,0,0,0.7)] border border-white/10 flex flex-col items-center justify-center text-center pointer-events-auto select-text group max-w-5xl w-full"
-          >
-            {/* Small orange uppercase text at top */}
-            <div className="mb-3 sm:mb-4 font-mono text-[10px] sm:text-xs tracking-[0.22em] sm:tracking-[0.28em] uppercase text-[#ff5a00] font-bold flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#ff5a00] animate-ping" />
-              <span>[ 24+ YEARS OF SOFTWARE ENGINEERING ]</span>
-            </div>
-
-            {/* Large, bold, pure white sans-serif headline stacked in two lines */}
-            <div className="w-full flex flex-col items-center justify-center px-2">
-              <h2 className="font-sans font-black text-3xl sm:text-5xl md:text-6xl lg:text-[4.75rem] xl:text-[5.25rem] tracking-tight leading-[0.98] text-white whitespace-nowrap uppercase">
-                DIGITAL PRODUCTS
-              </h2>
-              <div className="font-sans font-black text-3xl sm:text-5xl md:text-6xl lg:text-[4.75rem] xl:text-[5.25rem] tracking-tight leading-[0.98] text-white mt-1 text-center whitespace-nowrap uppercase">
-                ENGINEERED TO SCALE
-              </div>
-            </div>
-
-            {/* Thin horizontal divider line */}
-            <div className="w-full h-px bg-white/20 my-4 sm:my-5" />
-
-            {/* Left side small white text & Right side small orange text */}
-            <div className="w-full flex items-center justify-between text-[10px] sm:text-xs font-mono tracking-widest uppercase">
-              <span className="text-white font-medium">
-                EST. 2001 // WORLDWIDE IMPACT
-              </span>
-              <span className="text-[#ff5a00] font-bold">
-                ARCHITECTED FOR COMPLEXITY
-              </span>
-            </div>
-          </motion.div>
+          style={{
+            maskImage: "linear-gradient(to right, transparent 0%, black 20%)",
+            WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 20%)",
+          }}
+          className="relative h-full w-full flex items-center justify-end"
+        >
+          <SeamlessVideoLoop
+            src="/videos/Butterfly.mp4"
+            crossFadeDuration={1.2}
+            objectFit="contain"
+            objectPosition="right"
+            className="h-full w-full"
+          />
         </div>
       </div>
 
-      {/* ── Mobile Pillar Photos Carousel Strip (Visible on mobile/tablet) ── */}
-      <div className="sm:hidden px-4 py-3 bg-[#111111] border-b border-neutral-800 overflow-x-auto flex gap-3 no-scrollbar">
-        {PILLARS.map((pillar) => {
-          const Icon = pillar.icon;
-          return (
-            <div
-              key={`mobile-${pillar.id}`}
-              className="flex-shrink-0 w-36 h-28 relative rounded-sm overflow-hidden border border-white/15 bg-neutral-900"
-            >
-              <Image
-                src={pillar.image}
-                alt={pillar.category}
-                fill
-                sizes="144px"
-                className="object-cover object-center"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
-              <div className="absolute top-1.5 left-1.5 flex items-center gap-1 bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded-sm">
-                <Icon className="w-2.5 h-2.5 text-[#ff5a00]" />
-                <span className="font-mono text-[8px] font-bold text-white tracking-wider">{pillar.tag}</span>
-              </div>
-              <div className="absolute bottom-1.5 left-1.5 right-1.5 text-[9px] font-mono text-white/90 truncate font-semibold">
-                {pillar.category}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {/* ── Subtle Soft Gradient Overlay (Protects Left Typography Readability) ── */}
+      <div
+        aria-hidden
+        className="absolute inset-0 z-[2] pointer-events-none bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/60 to-transparent w-full md:w-3/5"
+      />
 
-      {/* ── Below the Black Block, on a Clean Light Background ── */}
-      <div className="relative z-10 w-full max-w-[1920px] mx-auto px-6 sm:px-12 md:px-16 lg:px-24 py-10 md:py-14 grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-end">
+      {/* ── Main Content Container ── */}
+      <div className="relative z-10 w-full max-w-[1920px] mx-auto px-6 sm:px-12 md:px-20 lg:px-28 pt-24 sm:pt-28 md:pt-32 pb-6 md:pb-8 flex-1 flex flex-col justify-between pointer-events-none">
         
-        {/* Left side: short refined paragraph in dark gray */}
-        <div className="md:col-span-5 flex flex-col justify-between h-full space-y-5">
+        {/* Left-Aligned Headline Block */}
+        <div className="w-full max-w-3xl pointer-events-auto flex flex-col items-start my-auto">
+          {/* H1: 3-line geometric bold headline */}
+          <h1 className="font-sans font-bold text-[clamp(2.1rem,4.9vw,4.8rem)] leading-[1.02] tracking-[-0.035em] text-white text-left select-none">
+            <motion.span
+              custom={0}
+              initial="hidden"
+              animate={isAppReady ? "visible" : "hidden"}
+              variants={headlineLineVariants}
+              className="block"
+            >
+              Strategic engineering.
+            </motion.span>
+            <motion.span
+              custom={1}
+              initial="hidden"
+              animate={isAppReady ? "visible" : "hidden"}
+              variants={headlineLineVariants}
+              className="block"
+            >
+              Proven since 2003.
+            </motion.span>
+            <motion.span
+              custom={2}
+              initial="hidden"
+              animate={isAppReady ? "visible" : "hidden"}
+              variants={headlineLineVariants}
+              className="block whitespace-nowrap"
+            >
+              Trusted by enterprise teams.
+            </motion.span>
+          </h1>
+
+          {/* Subcopy */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.7, delay: 0.4, ease: EASE_CUSTOM }}
-            className="font-sans text-base sm:text-lg lg:text-xl text-[#333333] font-normal leading-relaxed max-w-lg tracking-tight"
+            initial="hidden"
+            animate={isAppReady ? "visible" : "hidden"}
+            variants={subcopyVariants}
+            className="mt-6 md:mt-7 text-sm sm:text-[15px] md:text-base text-[#999999] max-w-[480px] font-sans font-normal leading-[1.55] tracking-normal"
           >
-            We design and engineer custom software, enterprise AI products, and cloud platforms with craft, agility, and precision.
+            End-to-end software, AI and cloud engineering, built with precision and delivered with care.
           </motion.p>
 
+          {/* Primary CTA (Start a Project) with Tech Hover Animation */}
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
-            transition={{ duration: 0.7, delay: 0.55, ease: EASE_CUSTOM }}
-            className="font-mono text-[10px] sm:text-[11px] text-neutral-500 uppercase tracking-widest leading-relaxed pt-3 border-t border-neutral-200"
+            initial="hidden"
+            animate={isAppReady ? "visible" : "hidden"}
+            variants={ctaVariants}
+            className="mt-7 md:mt-8"
           >
-            <p className="font-bold text-neutral-900">ARMIA SYSTEMS INC // GLOBAL ENGINEERING FOUNDRY</p>
-            <p className="text-neutral-500">FULL-CYCLE PRODUCT ARCHITECTURE &bull; ENTERPRISE AI LABS</p>
+            <a
+              href="#contact"
+              aria-label="Start a project with Armia Systems"
+              className="group relative inline-flex items-center h-[42px] md:h-[46px] font-mono text-[11px] md:text-xs tracking-[0.16em] uppercase transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-black border border-white/20 hover:border-brand-accent shadow-[0_0_20px_rgba(255,90,0,0)] hover:shadow-[0_0_25px_rgba(255,90,0,0.18)]"
+            >
+              {/* Dark Button Body with Animated Tech Lines */}
+              <span className="relative overflow-hidden px-5 md:px-7 font-medium bg-[#111111] text-white h-full flex items-center select-none transition-colors duration-300 group-hover:text-white">
+                {/* 1. Subtle Circuit/Grid Background Lines */}
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:10px_10px]"
+                />
+
+                {/* 1b. Slowly Drifting Architectural Tech Blocks */}
+                <span aria-hidden="true" className="absolute inset-0 pointer-events-none overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                  <span className="absolute top-[20%] left-[-15%] w-3.5 h-2.5 rounded-[1px] bg-white/10 border border-white/20 group-hover:translate-x-[260px] transition-transform duration-[6000ms] ease-linear" />
+                  <span className="absolute top-[55%] left-[-20%] w-5 h-2 rounded-[1px] bg-[#FF5A00]/20 border border-[#FF5A00]/40 group-hover:translate-x-[280px] transition-transform duration-[4800ms] ease-linear delay-150" />
+                  <span className="absolute top-[35%] left-[-10%] w-2.5 h-2.5 rounded-[1px] bg-white/15 border border-white/25 group-hover:translate-x-[270px] transition-transform duration-[7000ms] ease-linear delay-300" />
+                  <span className="absolute top-[70%] left-[-5%] w-2 h-1.5 rounded-[1px] bg-[#FF5A00]/30 border border-[#FF5A00]/50 group-hover:translate-x-[260px] transition-transform duration-[4200ms] ease-linear delay-500" />
+                </span>
+
+                {/* 2. Cyber Horizontal Scanning Ray Beam */}
+                <span
+                  aria-hidden="true"
+                  className="absolute top-0 bottom-0 -left-[100%] w-[80%] bg-gradient-to-r from-transparent via-[#FF5A00]/25 to-transparent pointer-events-none -skew-x-12 opacity-0 group-hover:opacity-100 group-hover:translate-x-[280%] transition-all duration-1000 ease-out"
+                />
+
+                {/* 3. Horizontal Micro Circuit Trace Lines */}
+                <span
+                  aria-hidden="true"
+                  className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#FF5A00] to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
+                />
+                <span
+                  aria-hidden="true"
+                  className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#FF5A00] to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-right"
+                />
+
+                {/* 4. Glowing Corner Circuit Nodes */}
+                <span
+                  aria-hidden="true"
+                  className="absolute top-1 left-1.5 w-1 h-1 rounded-full bg-[#FF5A00] opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_6px_#FF5A00]"
+                />
+                <span
+                  aria-hidden="true"
+                  className="absolute bottom-1 right-1.5 w-1 h-1 rounded-full bg-[#FF5A00] opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_6px_#FF5A00]"
+                />
+
+                {/* Text Content */}
+                <span className="relative z-10 transition-transform duration-300 group-hover:tracking-[0.18em]">
+                  START A PROJECT
+                </span>
+              </span>
+
+              {/* Orange Arrow Block */}
+              <div className="relative overflow-hidden flex items-center justify-center h-full w-[42px] md:w-[46px] bg-brand-accent transition-all duration-300 group-hover:bg-[#ff4500]">
+                <span
+                  className="text-white text-sm md:text-base font-semibold transition-transform duration-200 group-hover:translate-x-1"
+                  aria-hidden
+                >
+                  →
+                </span>
+              </div>
+            </a>
           </motion.div>
+
+          {/* Mobile placement */}
+          <motion.p
+            initial="hidden"
+            animate={isAppReady ? "visible" : "hidden"}
+            variants={footerLineVariants}
+            className="mt-8 text-xs sm:text-sm text-neutral-400/90 leading-snug md:hidden"
+          >
+            When you need senior-level engineers, dependable execution, and software that holds up in production.
+          </motion.p>
         </div>
 
-        {/* Right side: large bold black typography */}
-        <div className="md:col-span-7 flex flex-col md:items-end text-left md:text-right">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ duration: 0.85, delay: 0.35, ease: EASE_CUSTOM }}
-            className="font-sans font-black text-3xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tight leading-[0.96] text-[#111111] uppercase"
+        {/* Spot 2: Bottom-Right Supporting Line (Desktop view) with radial gradient scrim */}
+        <div className="relative w-full hidden md:flex justify-end pointer-events-auto">
+          {/* Soft radial scrim that extends beyond the bottom and right edges */}
+          <div
+            aria-hidden="true"
+            style={{
+              background:
+                "radial-gradient(ellipse 95% 85% at 90% 85%, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.65) 45%, rgba(10,10,10,0) 100%)",
+            }}
+            className="absolute -right-28 -bottom-16 w-[620px] h-[220px] pointer-events-none -z-10 blur-md"
+          />
+          <motion.p
+            initial="hidden"
+            animate={isAppReady ? "visible" : "hidden"}
+            variants={footerLineVariants}
+            className="relative z-10 max-w-[440px] text-right font-sans text-[15px] lg:text-[16.5px] text-neutral-200 leading-[1.4] font-normal tracking-tight [text-shadow:0_1px_4px_rgba(0,0,0,0.85)]"
           >
-            <div>SOFTWARE ARCHITECTURE</div>
-            <div className="text-neutral-900 mt-1">ENTERPRISE AI 2026</div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={isAppReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-            transition={{ duration: 0.6, delay: 0.7, ease: EASE_CUSTOM }}
-            className="mt-6 flex items-center gap-3 font-mono text-xs text-neutral-600 uppercase tracking-widest cursor-pointer group"
-          >
-            <span className="font-semibold text-neutral-900 group-hover:text-[#ff5a00] transition-colors duration-200">
-              Explore capabilities
-            </span>
-            <ArrowDown className="w-4 h-4 animate-bounce text-[#ff5a00] group-hover:translate-y-1 transition-transform duration-200" />
-          </motion.div>
+            When you need senior-level engineers, dependable execution, and software that holds up in production.
+          </motion.p>
         </div>
 
       </div>
 
-      {/* Pinned Bottom Partner Ticker Bar */}
-      <div className="relative z-20 w-full mt-auto border-t border-neutral-200 bg-black">
+      {/* Pinned Bottom Partner Ticker Bar (Seamless transition into the white Engineering section) */}
+      <div className="relative z-20 w-full mt-auto">
         <PartnerTicker />
       </div>
     </section>

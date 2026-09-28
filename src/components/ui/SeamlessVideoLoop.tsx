@@ -13,11 +13,13 @@ export function SeamlessVideoLoop({
   crossFadeDuration = 1.0,
   className = "",
   objectFit = "cover",
+  objectPosition = "center",
 }: {
   src: string;
   crossFadeDuration?: number;
   className?: string;
   objectFit?: "cover" | "contain";
+  objectPosition?: "center" | "right" | "left";
 }) {
   const video1Ref = useRef<HTMLVideoElement>(null);
   const video2Ref = useRef<HTMLVideoElement>(null);
@@ -74,9 +76,15 @@ export function SeamlessVideoLoop({
   }, [activeVideo, crossFadeDuration]);
 
   const fitClass = objectFit === "contain" ? "object-contain" : "object-cover";
+  const posClass =
+    objectPosition === "right"
+      ? "object-right"
+      : objectPosition === "left"
+      ? "object-left"
+      : "object-center";
 
   return (
-    <div className={`relative h-full w-full overflow-hidden bg-black flex items-center justify-center ${className}`}>
+    <div className={`relative h-full w-full overflow-hidden flex items-center justify-center ${className}`}>
       {/* Video 1 */}
       <video
         ref={video1Ref}
@@ -85,7 +93,7 @@ export function SeamlessVideoLoop({
         muted
         playsInline
         preload="auto"
-        className={`absolute inset-0 h-full w-full ${fitClass} object-center transition-opacity duration-1000 ease-in-out ${
+        className={`absolute inset-0 h-full w-full ${fitClass} ${posClass} transition-opacity duration-1000 ease-in-out ${
           activeVideo === 1 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
         }`}
       />
@@ -97,7 +105,7 @@ export function SeamlessVideoLoop({
         muted
         playsInline
         preload="auto"
-        className={`absolute inset-0 h-full w-full ${fitClass} object-center transition-opacity duration-1000 ease-in-out ${
+        className={`absolute inset-0 h-full w-full ${fitClass} ${posClass} transition-opacity duration-1000 ease-in-out ${
           activeVideo === 2 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
         }`}
       />

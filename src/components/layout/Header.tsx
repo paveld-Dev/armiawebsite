@@ -134,21 +134,14 @@ export function Header() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-40 w-full transition-all duration-300 select-none backdrop-blur-md bg-white/[0.08] border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] ${
+        className={`fixed top-0 left-0 right-0 z-40 w-full transition-all duration-300 select-none ${
           isHero
-            ? "py-5 md:py-6 text-white"
+            ? "bg-transparent border-transparent py-5 md:py-6 text-white"
             : isWhite
-            ? "bg-white/70 text-[#111111] border-neutral-200/60 py-4 md:py-5"
-            : "bg-black/40 text-white border-white/10 py-4 md:py-5"
+            ? "backdrop-blur-md bg-white/70 text-[#111111] border-b border-neutral-200/60 shadow-[0_4px_30px_rgba(0,0,0,0.06)] py-4 md:py-5"
+            : "backdrop-blur-md bg-black/40 text-white border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] py-4 md:py-5"
         }`}
       >
-        {/* Subtle Noise Texture Overlay - Only in Hero 1 mode */}
-        {isHero && activeHero === "hero1" && (
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 opacity-[0.06] pointer-events-none mix-blend-overlay bg-[url('/images/Noise.png')]"
-          />
-        )}
 
         <div className="relative z-10 w-full max-w-[1920px] mx-auto px-6 md:px-0">
           <div className="w-full md:w-[78%] md:ml-[10.8%] flex items-center justify-between">
@@ -156,7 +149,7 @@ export function Header() {
               href="/"
               className="group flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent rounded-sm"
             >
-              <div className="relative h-11 w-32 md:h-14 md:w-60 flex items-center transition-all duration-300">
+              <div className="relative h-14 w-44 sm:h-16 sm:w-56 md:h-20 md:w-72 flex items-center transition-all duration-300">
                 <Image
                   src="/images/armialogo.svg"
                   alt="Armia Systems"
