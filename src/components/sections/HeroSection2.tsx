@@ -12,6 +12,7 @@ interface MechanicalSlide {
   id: string;
   tag: string;
   videoSrc: string;
+  poster: string;
   headline: [string, string, string];
   subcopy: string;
   caption: string;
@@ -22,6 +23,7 @@ const MECHANICAL_SLIDES: MechanicalSlide[] = [
     id: "mechanical-1",
     tag: "01 // SYSTEM ARCHITECTURE",
     videoSrc: "/videos/Mechanical1.mp4",
+    poster: "/images/poster-mechanical1.jpg",
     headline: [
       "Strategic engineering.",
       "Proven since 2003.",
@@ -36,6 +38,7 @@ const MECHANICAL_SLIDES: MechanicalSlide[] = [
     id: "mechanical-2",
     tag: "02 // KINETIC PRECISION",
     videoSrc: "/videos/Mechanical2.mp4",
+    poster: "/images/poster-mechanical2.jpg",
     headline: [
       "Autonomous systems.",
       "Engineered to scale.",
@@ -50,6 +53,7 @@ const MECHANICAL_SLIDES: MechanicalSlide[] = [
     id: "mechanical-3",
     tag: "03 // INTELLIGENCE & CLOUD",
     videoSrc: "/videos/Mechanical3.mp4",
+    poster: "/images/poster-mechanical3.jpg",
     headline: [
       "Intelligent workflows.",
       "Modern cloud platforms.",
@@ -158,10 +162,12 @@ export function HeroSection2() {
               >
                 <SeamlessVideoLoop
                   src={slide.videoSrc}
+                  poster={slide.poster}
                   crossFadeDuration={1.2}
                   objectFit="cover"
                   objectPosition="right"
                   className="h-full w-full"
+                  isActive={isActive}
                 />
               </div>
             );
@@ -169,10 +175,10 @@ export function HeroSection2() {
         </div>
       </div>
 
-      {/* ── Subtle Soft Gradient Overlay (Protects Left Typography Readability) ── */}
+      {/* ── Subtle Soft Gradient Overlay (Protects Left Typography Readability, lets video shine on mobile) ── */}
       <div
         aria-hidden
-        className="absolute inset-0 z-[2] pointer-events-none bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/60 to-transparent w-full md:w-3/5"
+        className="absolute inset-0 z-[2] pointer-events-none bg-gradient-to-t sm:bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/70 to-[#0A0A0A]/30 sm:to-transparent w-full sm:w-3/5"
       />
 
       {/* ── Main Content Container ── */}
