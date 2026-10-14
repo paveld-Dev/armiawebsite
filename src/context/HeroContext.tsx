@@ -10,7 +10,7 @@ interface HeroContextType {
 }
 
 const HeroContext = createContext<HeroContextType>({
-  activeHero: "hero1",
+  activeHero: "hero2",
   setActiveHero: () => {},
 });
 

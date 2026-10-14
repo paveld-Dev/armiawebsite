@@ -111,7 +111,13 @@ export function HeroSection() {
           autoPlay
           loop
           muted
+          // @ts-expect-error defaultMuted is recognized by React DOM
+          defaultMuted={true}
           playsInline
+          webkit-playsinline="true"
+          x5-playsinline="true"
+          disablePictureInPicture
+          poster="/images/poster-orange.jpg"
           className="h-full w-full object-cover object-center"
         >
           <source src="/videos/orange.mp4" type="video/mp4" />

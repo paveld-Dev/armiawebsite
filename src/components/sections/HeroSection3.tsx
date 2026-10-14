@@ -86,6 +86,7 @@ export function HeroSection3() {
         >
           <SeamlessVideoLoop
             src="/videos/Butterfly.mp4"
+            poster="/images/poster-butterfly.jpg"
             crossFadeDuration={1.2}
             objectFit="contain"
             objectPosition="right"

@@ -147,7 +147,6 @@ export function SeamlessVideoLoop({
         // @ts-expect-error defaultMuted is recognized by React DOM
         defaultMuted={true}
         playsInline
-        // @ts-expect-error webkit-playsinline needed for iOS WebViews
         webkit-playsinline="true"
         x5-playsinline="true"
         disablePictureInPicture
@@ -166,7 +165,6 @@ export function SeamlessVideoLoop({
         // @ts-expect-error defaultMuted is recognized by React DOM
         defaultMuted={true}
         playsInline
-        // @ts-expect-error webkit-playsinline needed for iOS WebViews
         webkit-playsinline="true"
         x5-playsinline="true"
         disablePictureInPicture
